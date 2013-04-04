@@ -1,0 +1,11 @@
+multiplayer:
+	skills
+		active skills, dont send command on prepare skill
+	sync deaths by time
+	send message only if host ???
+	on shoot
+		if me - broadcast
+		if other tank - dont broadcast
+		if tower - host broadcasts
+		if soldier - soldier owner broadcasts
+		if host dc - assign host to other person
