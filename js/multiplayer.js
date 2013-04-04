@@ -7,6 +7,8 @@ var waiting_users = 0;
 var SOCKET_ROOMS = '';
 var SOCKET_ROOM_ID = '';
 
+//===== LIBRARY ================================================================
+
 //connecto to sockets server
 function connect_server(){
 	orbiter = new net.user1.orbiter.Orbiter();
@@ -126,7 +128,8 @@ function get_packet_inner(fromClient, message){
 function get_packet_inner_id(fromClient, message){
 	get_packet(fromClient, message);
 	}
-//==============================================================================
+
+//===== COMMUNICATION ==========================================================
 
 //send packet to server
 function send_packet(type, message){
@@ -380,7 +383,6 @@ function get_packet(fromClient, message){
 		}
 	else if(type == 'tank_kill'){	//tank was killed
 		//DATA = room_id, player, killed_tank_id
-		if(DATA[1]==name) return false; 	//already done
 		TANK_TO = get_tank_by_id(DATA[2]);
 		if(TANK_TO===false) log('Error: tank_to "'+DATA[2]+'" was not found on tank_kill.');
 		TANK_FROM = get_tank_by_name(DATA[1]);
@@ -390,8 +392,8 @@ function get_packet(fromClient, message){
 		if(TANK_TO.deaths == undefined)	TANK_TO.deaths = 1;
 		else				TANK_TO.deaths = TANK_TO.deaths + 1;
 		
-		//tower dead - decreasing base armor
 		if(TYPES[TANK_TO.type].name == "Tower"){
+			//change base stats
 			for(var b in TANKS){
 				if(TYPES[TANKS[b].type].name == "Base" && TANKS[b].team == TANK_TO.team){
 					TANKS[b].armor = TANKS[b].armor - 10;
@@ -399,6 +401,7 @@ function get_packet(fromClient, message){
 						TANKS[b].armor = 0;	
 					}
 				}
+			//removing tower
 			for(var b in TANKS){
 				if(TANKS[b].id==TANK_TO.id){	
 					TANKS.splice(b, 1);  b--;
@@ -406,6 +409,7 @@ function get_packet(fromClient, message){
 					}
 				}
 			}
+		//adding kill stats
 		if(TYPES[TANK_TO.type].no_repawn == undefined){
 			//player
 			if(TANK_FROM.kills == undefined)	TANK_FROM.kills = 1;

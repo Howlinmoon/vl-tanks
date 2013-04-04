@@ -1030,17 +1030,12 @@ function do_damage(TANK, TANK_TO, force_damage, armor_piercing_force){
 			TANK_TO.deaths = 1;
 		else
 			TANK_TO.deaths = TANK_TO.deaths + 1;
-
-		if(TYPES[TANK_TO.type].no_repawn != undefined){		//tanks without repawn
-			//draw dead tank icon
-			if(TYPES[TANK_TO.type].icon_dead != undefined){
-				var img = new Image();
-				if(TANK_TO.team == 'B')
-					img.src = 'img/tanks/'+TYPES[TANK_TO.type].name+'/'+TYPES[TANK_TO.type].icon_dead[0];
-				else
-					img.src = 'img/tanks/'+TYPES[TANK_TO.type].name+'/'+TYPES[TANK_TO.type].icon_dead[1];
-				canvas_map.drawImage(img, TANK_TO.x, TANK_TO.y);
-				}
+		//find killer
+		var killer = TANK;
+		if(TANK.master != undefined){
+			killer = TANK.master;
+			}
+		if(TYPES[TANK_TO.type].no_repawn != undefined){	//tanks without repawn
 			//base dead
 			if(TYPES[TANK_TO.type].name == "Base"){
 				if(game_mode == 1){
@@ -1049,7 +1044,7 @@ function do_damage(TANK, TANK_TO, force_damage, armor_piercing_force){
 				else
 					register_tank_action('end_game', opened_room_id, false, TANK_TO.team);
 				}
-			else if(TYPES[TANK_TO.type].name == "Tower"){
+			else if(TYPES[TANK_TO.type].name == "Tower" && game_mode == 1){
 				//tower dead - decreasing base armor
 				for(var b in TANKS){
 					if(TYPES[TANKS[b].type].name == "Base" && TANKS[b].team == TANK_TO.team){
@@ -1058,49 +1053,65 @@ function do_damage(TANK, TANK_TO, force_damage, armor_piercing_force){
 							TANKS[b].armor = 0;	
 						}
 					}
-				if(game_mode == 2){
-					register_tank_action('kill', opened_room_id, name, TANK_TO.id);
-					}
 				}
-			//remove tank
-			var del_index = false;
-			for(var j in TANKS){
-				if(TANKS[j].id == TANK_TO.id){
-					TANKS.splice(j, 1);
-					break;
+			if(game_mode == 2){
+				if(check_if_broadcast_kill(TANK, TANK_TO)==true)
+					register_tank_action('kill', opened_room_id, killer.name, TANK_TO.id);
+				}
+			else{
+				//remove tank
+				var del_index = false;
+				for(var j in TANKS){
+					if(TANKS[j].id == TANK_TO.id){
+						TANKS.splice(j, 1);
+						break;
+						}
 					}
 				}
 			}
-		else{
+		else{ //tank with respawn
+			//if tank
 			if(TYPES[TANK_TO.type].type == 'tank'){
-				var killer = TANK;
-				if(TANK.master != undefined){
-					killer = TANK.master;
-					}
 				//update kills
-				if(killer.kills == undefined)
-					killer.kills = 1;
-				else
-					killer.kills = killer.kills + 1;
-				
+				if(game_mode == 1){
+					if(killer.kills == undefined)
+						killer.kills = 1;
+					else
+						killer.kills = killer.kills + 1;
+					//add score
+					if(TANK.score == undefined)
+						TANK.score = 0;
+					TANK.score = TANK.score + 20;	// +20 for kill
+					}
 				if(game_mode==2){
 					var killer = killer.name;
 					if(killer != undefined)
 						register_tank_action('chat', opened_room_id, false, "Player "+TANK_TO.name+" was killed by "+killer.name+"!");
 					}	
-				
-				//add score
-				if(TANK.score == undefined)
-					TANK.score = 0;
-				TANK.score = TANK.score + 20;	// +20 for kill
 				}
-			if(game_mode == 2 && TYPES[TANK_TO.type].type != 'human')
-				register_tank_action('kill', opened_room_id, name, TANK_TO.id);
+			if(game_mode == 2 && TYPES[TANK_TO.type].type != 'human' && check_if_broadcast_kill(TANK, TANK_TO)==true)
+				register_tank_action('kill', opened_room_id, killer.name, TANK_TO.id);
 		
 			//player death			
-			death(TANK_TO);	
+			if(game_mode == 1)
+				death(TANK_TO);	
 			}
 		}
+	}
+//check if broadcast other tank kill
+function check_if_broadcast_kill(KILLER, VICTIM){
+	var ROOM = get_room_by_id(opened_room_id);
+	
+	//me killer
+	if(KILLER.name = name) return true;	
+	
+	//only host broadcast tower kills
+	if(TYPES[KILLER.type].type == 'tower' && ROOM.host == name) return true; 
+	
+	//my soldier killer - me broadcast
+	if(TANK.master != undefined && TANK.master.name == name) return true; 
+	
+	return false;
 	}
 //tank death
 function death(tank){
@@ -1189,7 +1200,19 @@ function do_ability(nr, TANK){
 				register_tank_action('skill_do', opened_room_id, name,  nr);
 				}
 			else if(broadcast_mode==2){
-				//first prepare and get mouse click, then broadcast, and after approval - execute
+				//broadcast later
+				var ability_reuse = window[ability_function](TANK);
+				if(ability_reuse != undefined && ability_reuse != 0){
+					TANK['ability_'+nr+'_in_use']=1;
+					var tmp = new Array();
+					tmp['function'] = "draw_ability_reuse";
+					tmp['duration'] = ability_reuse;
+					tmp['type'] = 'REPEAT';
+					tmp['nr'] = nr-1;	
+					tmp['max'] = ability_reuse;
+					tmp['tank'] = TANK;
+					timed_functions.push(tmp);
+					}
 				}
 			}
 		}

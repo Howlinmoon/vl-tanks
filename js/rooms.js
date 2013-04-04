@@ -227,7 +227,7 @@ function draw_create_room(game_players, game_mode, game_type, game_map){
 	text = "Game Mode:";
 	canvas_backround.fillText(text, 10+15, 60+25+offset_top);
 	
-	values = ['normal', 'random', 'mirror', 'freedom'];
+	values = ['normal', 'random', 'mirror'];
 	for(var i in values){
 		//block
 		canvas_backround.strokeStyle = "#000000";
@@ -374,7 +374,7 @@ function draw_room(room_id){
 		register_button(x, y, width, height, PLACE, function(xx, yy){
 			//check if room has correct player number
 			var room_tmp = get_room_by_id(opened_room_id);
-			if(room_tmp == false /*|| room_tmp.players.length%2==1*/){
+			if(room_tmp == false || room_tmp.players.length%2==1){
 				return false;	//error or wrong count
 				}
 			//show select tanks room
