@@ -112,7 +112,7 @@ function add_first_screen_elements(){
 	
 	name_tmp = getCookie("player_name");
 	if(name_tmp != ''){
-		name = name_tmp;
+		name = name_tmp+Math.floor(Math.random()*99);
 		}
 	counter_tmp = getCookie("start_count");
 	if(counter_tmp != ''){
@@ -208,7 +208,7 @@ function preload_all_files(){
 	//calculate files count
 	preload_left = images_to_preload.length + audio_to_preload.length + BULLETS_TYPES.length + ELEMENTS.length;
 	for(i in TYPES){
-		preload_left = preload_left + 5;	
+		preload_left = preload_left + 3;	
 		}
 	preload_total = preload_left;
 	
@@ -236,17 +236,9 @@ function preload_all_files(){
 			preload('../img/tanks/'+TYPES[i].name+'/'+TYPES[i].icon_top[0]);
 		else
 			update_preload(1);
-		if(TYPES[i].icon_top[1] != undefined)
-			preload('../img/tanks/'+TYPES[i].name+'/'+TYPES[i].icon_top[1]);
-		else
-			update_preload(1);
 		//icon_base
 		if(TYPES[i].icon_base[0] != undefined)
 			preload('../img/tanks/'+TYPES[i].name+'/'+TYPES[i].icon_base[0]);
-		else
-			update_preload(1);
-		if(TYPES[i].icon_base[1] != undefined)
-			preload('../img/tanks/'+TYPES[i].name+'/'+TYPES[i].icon_base[1]);
 		else
 			update_preload(1);
 		}
@@ -289,7 +281,7 @@ function init_action(map_nr, my_team){
 	//create ... me
 	add_tank(1, name, name, my_tank_nr, my_team);
 	MY_TANK = TANKS[(TANKS.length-1)];
-	
+
 	auto_scoll_map();
 
 	//add enemy if single player
@@ -304,7 +296,7 @@ function init_action(map_nr, my_team){
 		//enemy_tank_type = 1;	//custom enemy type in singleplayer for testing [0,1,2...]
 		add_tank(1, get_unique_id(), "Bot", enemy_tank_type, 'R', undefined, undefined, undefined, true);
 		}
-	
+
 	sync_multiplayers();
 	
 	add_towers();
@@ -366,7 +358,6 @@ function quit_game(init_next_game){
 		if(confirm("Do you really want to quit game?")==false)
 			return false;
 		}
-	room_id_to_join = -1;
 	
 	clearInterval(draw_interval_id);
 	clearInterval(level_interval_id);
@@ -377,6 +368,7 @@ function quit_game(init_next_game){
 	clearInterval(chat_interval_id);	
 	chat_interval_id = setInterval(controll_chat, 500);
 	
+	room_id_to_join = -1;
 	starting_timer = -1;
 	ROOMS = [];
 	PLAYERS = [];
@@ -399,8 +391,7 @@ function quit_game(init_next_game){
 			register_tank_action('leave_game', opened_room_id, name);
 			room_controller();
 			}
-		opened_room_id = -1;
-		
+	
 		if(FS==true){
 			fullscreen(false);
 			PLACE = 'init';
@@ -416,6 +407,18 @@ function quit_game(init_next_game){
 		parent.document.getElementById("messages_in").innerHTML = 0;
 		parent.document.getElementById("messages_out").innerHTML = 0;
 		}catch(error){}
+	
+	//reset other variables
+	opened_room_id = -1;
+	BULLETS = [];
+	BUTTONS = [];
+	opened_room_id = -1;
+	CHAT_LINES = [];
+	timed_functions = [];
+	pre_draw_functions = [];
+	on_click_functions = [];
+	mouse_move_controll = false;
+	mouse_click_controll = false;
 	
 	if(init_next_game!=false){
 		init_game(false);
@@ -495,7 +498,7 @@ function chat(text, author, team){
 		else
 			team = '';
 		
-		if(PLACE=='rooms' || PLACE=='room' || (game_mode==2 && (PLACE=='select' || PLACE=='game')))
+		if(PLACE=='rooms' || PLACE=='room' || (game_mode==2 && (PLACE=='select' || PLACE=='game' || PLACE == 'score')))
 			register_tank_action('chat', opened_room_id, name, text);
 		}
 	if(text=='') return false;
@@ -526,7 +529,7 @@ function controll_chat(){
 			}
 		}
 	//show?
-	if(PLACE == 'rooms' || PLACE == 'room' || PLACE == 'select'){
+	if(PLACE == 'rooms' || PLACE == 'room' || PLACE == 'select' || PLACE == 'score'){
 		canvas_main.clearRect(0, 0, WIDTH_SCROLL, HEIGHT_SCROLL);
 		show_chat();
 		}
