@@ -52,11 +52,11 @@ function draw_tank(tank){
 		if(TYPES[tank.type].icon_top[0] != undefined)
 			cache_id += "SA:"+tank.fire_angle+',';
 		
-		if(tank.cache_tank != undefined && tank.cache_tank.unique == cache_id && tank.cache_tank_verified==2 ){		if(tank.id==MY_TANK.id) log('cache');
+		if(tank.cache_tank != undefined && tank.cache_tank.unique == cache_id && tank.cache_tank_verified==2 ){
 			//read from cache
 			canvas_main.drawImage(tank.cache_tank.object, round(tank.x+map_offset[0])-padding, round(tank.y+map_offset[1])-padding);
 			}
-		else{														if(tank.id==MY_TANK.id) log('renew.....');
+		else{
 			tank.cache_tank_verified = 0;
 			//create tmp
 			var tmp_canvas = document.createElement('canvas');
@@ -171,283 +171,7 @@ function draw_tank(tank){
 			add_hp_bar(tank);
 			}
 		}	
-
-	//draw tank in mini-map 20x17 - 70x116
-	if(TYPES[tank.type].type=='tower' ||( tank.dead != 1 && check_enemy_visibility(tank)==true)){
-		//settings
-		var button_width = 120;
-		var button_height = 138;
-		var pos1 = 5;
-		var pos2 = HEIGHT_APP-150-25+5;
-		//draw
-		if(tank.team == 'B')
-			canvas_backround.fillStyle = "#0000aa";
-		else
-			canvas_backround.fillStyle = "#b12525";
-		msize = 3;
-		if(TYPES[tank.type].type == 'human')
-			msize = 2;
-		var tank_x = tank.x;
-		var tank_y = tank.y;	
-		if(tank_x<0)	tank_x=0;
-		if(tank_y<0)	tank_y=0;
-		if(tank_x>MAPS[level-1].width)	tank_x=MAPS[level-1].width;
-		if(tank_y>MAPS[level-1].height)	tank_y=MAPS[level-1].height;
-		
-		tank_x = pos1 + Math.round(tank_x * button_width / round(MAPS[level-1].width));
-		tank_y = pos2 + round(tank_y * button_height /(MAPS[level-1].height));
-		canvas_backround.fillRect(tank_x, tank_y, msize, msize);
-		}
-	}
-//redrwar tanks stats in status bar	
-function redraw_tank_stats(){
-	status_y = HEIGHT_APP-150-25;
-	var left_x = 150;
-	var left_x_values = 200;
-	var gap = 19;
-	var top_y = HEIGHT_APP-150-25+30;
-	var nr = 0;
-	
-	//clear
-	canvas_backround.fillStyle = "#000000";
-	canvas_backround.fillRect(left_x, top_y-20, 250, 130);
-	
-	//font
-	canvas_backround.fillStyle = "#8fc74c";
-	canvas_backround.font = "bold 9px Verdana";
-	
-	//level
-	canvas_backround.fillText("Level:", left_x, top_y+nr*gap);
-	var text = Math.floor(MY_TANK.armor);
-	canvas_backround.fillText(MY_TANK.level, left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//life
-	canvas_backround.fillText("Life:", left_x, top_y+nr*gap);
-	var text = round(MY_TANK.hp)+"/"+(TYPES[MY_TANK.type].life[0]+TYPES[MY_TANK.type].life[1]*(MY_TANK.level-1));
-	canvas_backround.fillText(text, left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//damage
-	canvas_backround.fillText("Damage:", left_x, top_y+nr*gap);
-	var dps_string = parseInt(MY_TANK.damage)/parseInt(MY_TANK.attack_delay);
-	if(MY_TANK.debuffs != undefined){
-		damage_first = dps_string;
-		for(var dd in MY_TANK.debuffs){
-			if(MY_TANK.debuffs[dd][0]=='weak'){
-				var diff = damage_first * MY_TANK.debuffs[dd][1] / 100;
-				dps_string = dps_string - diff;
-				if(dps_string < 0)
-					dps_string = 0;
-				}
-			}
-		}
-	dps_string = Math.floor(dps_string);
-	canvas_backround.fillText(dps_string+" DPS", left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//armor
-	canvas_backround.fillText("Armor:", left_x, top_y+nr*gap);
-	var armor_text = Math.floor(MY_TANK.armor);
-	canvas_backround.fillText(armor_text+"%", left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//accuracy
-	/*canvas_backround.fillText("Acuracy:", left_x, top_y+nr*gap);
-	var accuracy = TYPES[MY_TANK.type].accuracy;
-	if(MY_TANK.move==1)
-		accuracy = accuracy-10;
-	canvas_backround.fillText(accuracy+"%", left_x_values, top_y+nr*gap);
-	nr++;*/
-	
-	//range
-	canvas_backround.fillText("Range:", left_x, top_y+nr*gap);
-	canvas_backround.fillText(TYPES[MY_TANK.type].range+" meters", left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//speed
-	canvas_backround.fillText("Speed:", left_x, top_y+nr*gap);
-	var speed_text = MY_TANK.speed;
-	if(MY_TANK.debuffs != undefined){
-		speed_first = speed_text;
-		for(var dd in MY_TANK.debuffs){
-			if(MY_TANK.debuffs[dd][0]=='slow'){
-				var diff = speed_first * MY_TANK.debuffs[dd][1] / 100;
-				speed_text = speed_text - diff;
-				if(speed_text < 0)
-					speed_text = 0;
-				}
-			}
-		}
-	speed_text = Math.floor(speed_text)+" kph";
-	canvas_backround.fillText(speed_text, left_x_values, top_y+nr*gap);
-	nr++;
-	
-	nr=0;
-	var left_x = 150+150;
-	var left_x_values = 200+150;
-	
-	//kills
-	canvas_backround.fillText("Kills:", left_x, top_y+nr*gap);
-	var text;
-	text = MY_TANK.kills;
-	canvas_backround.fillText(text, left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//deaths
-	canvas_backround.fillText("Deaths:", left_x, top_y+nr*gap);
-	var text = MY_TANK.deaths;
-	canvas_backround.fillText(text, left_x_values, top_y+nr*gap);
-	nr++;
-	
-	//players
-	if(game_mode == 2){
-		canvas_backround.fillText("Players:", left_x, top_y+nr*gap);
-		ROOM = get_room_by_id(opened_room_id);
-		var text = ROOM.players_on+"/"+ROOM.players_max;
-		canvas_backround.fillText(text, left_x_values, top_y+nr*gap);
-		nr++;
-		}
-	
-	//show fps
-	update_fps();
-	}
-var ABILITIES_POS = [];
-//redraw tank skills
-function draw_tank_abilities(){
-	var gap = 10;
-	var status_x_tmp = 569+gap;
-	var status_y = HEIGHT_APP-150-25+4+gap;
-	var letter_width = 5.5;
-	
-	for (i in TYPES[MY_TANK.type].abilities){
-		//check if abilites not in use
-		if(MY_TANK['ability_'+(1+parseInt(i))+'_in_use'] != undefined)
-			continue;
-		
-		//button
-		if(TYPES[MY_TANK.type].abilities[i].passive == false){
-			//passive
-			canvas_backround.strokeStyle = "#196144";
-			canvas_backround.fillStyle = "#8fc74c";
-			roundRect(canvas_backround, status_x_tmp+i*(SKILL_BUTTON+gap), status_y, SKILL_BUTTON, SKILL_BUTTON, 3, true);
-			}
-		else{
-			canvas_backround.strokeStyle = "#196144";
-			canvas_backround.fillStyle = "#69a126";
-			roundRect(canvas_backround, status_x_tmp+i*(SKILL_BUTTON+gap), status_y, SKILL_BUTTON, SKILL_BUTTON, 3, true);
-			}
-			
-		//text
-		ability_text = TYPES[MY_TANK.type].abilities[i].name;
-		canvas_backround.fillStyle = "#196119";
-		canvas_backround.font = "bold 10px Verdana";
-		if(ability_text.length>9)
-			canvas_backround.font = "bold 8px Verdana";
-		canvas_backround.fillText(ability_text, status_x_tmp+i*(SKILL_BUTTON+gap)+Math.floor((SKILL_BUTTON-ability_text.length*letter_width)/2), status_y+SKILL_BUTTON/2+3);
-	
-		//save position
-		if(ABILITIES_POS.length < TYPES[MY_TANK.type].abilities.length){
-			var tmp = new Array();
-			tmp['x'] = status_x_tmp+i*70;
-			tmp['y'] = status_y;
-			tmp['width'] = SKILL_BUTTON;
-			tmp['height'] = SKILL_BUTTON;
-			tmp['nr'] = parseInt(i)+1;
-			ABILITIES_POS.push(tmp);
-			}
-		}
-	}
-//draw tanks skills reuse animation
-function draw_ability_reuse(object){
-	var gap = 10;
-	var status_x_tmp = 569+gap;
-	var status_y = HEIGHT_APP-150-25+4+gap;
-	var letter_width = 5.5;
-	
-	if(object != undefined){
-		if(object['tank']['respan_time'] != undefined || object['tank']['ability_'+(object.nr+1)+'_in_use'] != 1){
-			object.duration=0;	//tank dead
-			}
-		
-		var i = object.nr;
-		
-		if(object.duration==0){
-			delete object['tank']['ability_'+(i+1)+'_in_use'];
-			}
-		
-		//button
-		if(TYPES[MY_TANK.type].abilities[i].passive == false){
-			//passive
-			canvas_backround.strokeStyle = "#196144";
-			canvas_backround.fillStyle = "#8fc74c";
-			roundRect(canvas_backround, status_x_tmp+i*(SKILL_BUTTON+gap), status_y, SKILL_BUTTON, SKILL_BUTTON, 3, true);
-			}
-		else{
-			canvas_backround.strokeStyle = "#196144";
-			canvas_backround.fillStyle = "#69a126";
-			roundRect(canvas_backround, status_x_tmp+i*(SKILL_BUTTON+gap), status_y, SKILL_BUTTON, SKILL_BUTTON, 3, true);
-			}
-		
-		//if active
-		if(TYPES[MY_TANK.type].abilities[i].passive == false){
-			var img = new Image();
-			var img_height = SKILL_BUTTON * object.duration / object.max;
-			if(img_height<1){
-				canvas_backround.fillStyle = "#8fc74c";
-				img_height = SKILL_BUTTON;
-				}
-			else
-				canvas_backround.fillStyle = "#69a126";
-			//canvas_backround.fillStyle = "#ff0000";
-			canvas_backround.fillRect(status_x_tmp+i*(SKILL_BUTTON+gap), status_y, SKILL_BUTTON, Math.floor(img_height));
-			}
-	
-		//text
-		canvas_backround.fillStyle = "#196119";
-		canvas_backround.font = "bold 10px Verdana";
-		var ability_text = TYPES[MY_TANK.type].abilities[i].name;
-		if(ability_text.length>9)
-			canvas_backround.font = "bold 8px Verdana";
-		canvas_backround.fillText(ability_text, status_x_tmp+i*(SKILL_BUTTON+gap)+Math.floor((SKILL_BUTTON-ability_text.length*letter_width)/2), status_y+SKILL_BUTTON/2+3);
-		}
-	}
-var ability_hover_id = '-1';
-var ability_hover_text = '';
-//show skills descriptino on mouse hover
-function show_skill_description(){
-	var gap = 10;
-	var status_x_tmp = 569+gap;
-	var status_y = HEIGHT_APP-150-25+4+gap;
-	
-	//clean description
-	canvas_backround.fillStyle = "#000000";
-	canvas_backround.fillRect(status_x_tmp, status_y+110-10, 210, 25);
-	
-	var limit = 35;
-	var ability_hover_text_more = '';
-	if(ability_hover_text.length > limit){
-		var words = ability_hover_text.split(" ");
-		ability_hover_text = '';
-		active_line = 1;
-		for(var i in words){
-			if(ability_hover_text.concat(' ').concat(words[i]).length < limit && active_line==1)
-				ability_hover_text = ability_hover_text+" "+words[i];
-			else{ 
-				ability_hover_text_more = ability_hover_text_more+" "+words[i];
-				active_line=2;
-				}
-			}
-		}
-	
-	//show description
-	canvas_backround.fillStyle = "#196119";
-	canvas_backround.font = "bold 10px Verdana";
-	canvas_backround.fillText(ability_hover_text, status_x_tmp, status_y+110);
-	
-	canvas_backround.fillStyle = "#196119";
-	canvas_backround.font = "bold 10px Verdana";
-	canvas_backround.fillText(ability_hover_text_more, status_x_tmp, status_y+110+13);
+	update_radar(tank);
 	}
 //tank hp bar above
 function add_hp_bar(tank){
@@ -628,6 +352,7 @@ function check_collisions(xx, yy, TANK, mode){
 				if(TANKS[i].id == TANK.id) continue;			//same tank
 				if(TYPES[TANK.type].type == 'tank' && TYPES[TANKS[i].type].type == 'human') continue;	//tanks can go over soldiers
 				if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'tank') continue;	//soldiers can go over tanks, why? see above
+				if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'human') continue;	//soldier can go over soldiers ...
 				if(TANKS[i].dead == 1) continue;		//tank dead
 				var size2 = TYPES[TANKS[i].type].size[1];
 				if(TYPES[TANKS[i].type].type == 'human')	
@@ -659,6 +384,7 @@ function tank_level_handler(){	//once per second
 		time_diff = (Date.now() - TANKS[i].begin_time)/1000 - TANKS[i].death_time + TANKS[i].bullets;
 		time_diff = Math.ceil(time_diff/30);
 		TANKS[i].level = time_diff;
+		if(TANKS[i].level>99) TANKS[i].level = 99;	//max 99
 		
 		//do level changes	
 		if(TANKS[i].level != last_level){				//lvl changed
@@ -1004,14 +730,11 @@ function do_damage(TANK, TANK_TO, force_damage, armor_piercing_force){
 		}
 	//death	
 	else{	
-		//if me - redraw stats
-		if(TANK_TO.id == MY_TANK.id)
-			redraw_tank_stats();
-		
 		//updates deaths
 		if(game_mode == 1){
 			TANK_TO.deaths = TANK_TO.deaths + 1;
 			}
+		
 		//find killer
 		var killer = TANK;
 		if(TANK.master != undefined){
@@ -1383,4 +1106,3 @@ function add_tank(level, id, name, type, team, x, y, angle, AI, master_tank){
 		TANK.master = master_tank;	
 	TANKS.push(TANK);
 	}
- 
