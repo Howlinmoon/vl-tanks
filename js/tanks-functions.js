@@ -3,7 +3,9 @@
 function Soldiers(TANK, descrition_only){
 	var n = 3;
 	if(descrition_only != undefined)
-		return 'Send '+n+' soldiers to the fight.';
+		return 'Send '+n+' soldiers to the fight. Only in single player.';
+	
+	if(game_mode == 2) return 0;
 	
 	//prepare
 	var type = '0';
@@ -14,12 +16,14 @@ function Soldiers(TANK, descrition_only){
 	var angle = 180;
 	if(TANK.team != 'B')
 		angle = 0;
+	//delete TANK.soldiers_direction
 	
 	//add
 	for(var i=0; i<n; i++){
 		x = round(TANK.x)-30+i*30;
 		y = round(TANK.y);
-		add_tank(TANK.level, 'bot'+TANK.team+get_unique_id()+"."+x+"."+y, '', type, TANK.team, x, y, angle, true, TANK);
+		id = 'bot'+TANK.team+get_unique_id()+"."+x+"."+y;
+		add_tank(TANK.level, id, '', type, TANK.team, x, y, angle, true, TANK);
 		}
 	
 	//return reuse
@@ -154,6 +158,7 @@ function Repair(TANK, descrition_only){
 		if(TANKS[ii].team != TANK.team)			continue; //enemy
 		distance = get_distance_between_tanks(TANK, TANKS[ii]);
 		if(distance > range)		continue;	//too far
+		//add effect
 		if(TANKS[ii].extra_icon==undefined)
 			TANKS[ii].extra_icon = [];
 		TANKS[ii].extra_icon.push(['repair.png', 16, 16, TANK.id]);
@@ -180,8 +185,9 @@ function Repair_stop(object){
 	var TANK = object.tank;
 	for (ii in TANKS){
 		for (jj in TANKS[ii].extra_icon){
-			if(TANKS[ii].extra_icon[jj][0] == 'repair.png' && TANK.id == TANKS[ii].id)
+			if(TANKS[ii].extra_icon[jj][0] == 'repair.png' && TANK.id == TANKS[ii].extra_icon[jj][3]){
 				TANKS[ii].extra_icon.splice(jj, 1);
+				}
 			}
 		for (jj in TANKS[ii].extra_hp){
 			if(TANKS[ii].extra_hp[jj][1] == TANK.id)
@@ -196,9 +202,9 @@ function Mortar(TANK, descrition_only){
 	if(descrition_only != undefined)
 		return 'Launch missile with area damage.';
 		
-	var reuse = 20000;	reuse = 1000;
-	var power = 90;		power = 2000;
-	var range = 150;	range = 200;
+	var reuse = 20000;
+	var power = 80;
+	var range = 120;
 	var splash_range = 70;
 		
 	if(TANK.try_mortar != undefined){
@@ -224,7 +230,7 @@ function draw_mortar_marker(tank_id){
 	//some drawings
 	if(TANK['try_mortar'] != undefined && TANK.name == name){
 		img = new Image();
-		img.src = 'img/target.png';
+		img.src = '../img/target.png';
 		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
 		}
 	}
@@ -329,7 +335,7 @@ function Camouflage(TANK, descrition_only){
 		return 'Slowly become invisible.';
 	
 	var reuse = 15000;
-	var duration = 10000;
+	var duration = 5000;
 	
 	//TANK.speed = 0;
 	TANK.invisibility = 1;
@@ -358,7 +364,7 @@ function Camouflage_stop(object){
 var MINES = [];
 function Mine(TANK, descrition_only){
 	if(descrition_only != undefined)
-		return 'Put mine on the ground. Sadly we don\'t have mines yet. Sorry.';
+		return 'Put mine on the ground.';
 		
 	var reuse = 10000;
 	var power = 150;
@@ -387,9 +393,9 @@ function Mine_once(TANK){
 function draw_mines(tank_id){
 	var tank = get_tank_by_id(tank_id);
 	for(var i in MINES){
-		if(MINES[i].team != tank.team) continue;	//enemy dont see it
+		if(MINES[i].team != MY_TANK.team) continue;	//enemy dont see it
 		img = new Image();
-		img.src = 'img/map/mine.png';
+		img.src = '../img/map/mine.png';
 		canvas_main.drawImage(img, MINES[i].x-7+map_offset[0], MINES[i].y-7+map_offset[1]);
 		}
 	}
@@ -418,7 +424,7 @@ function check_mines(tank_id){
 		
 					//draw it
 					img = new Image();
-					img.src = 'img/explosion_big.png';
+					img.src = '../img/explosion_big.png';
 					canvas_main.drawImage(img, MINES[m].x-25+map_offset[0], MINES[m].y-25+map_offset[1]);
 					
 					//delete mine
@@ -436,7 +442,7 @@ function Virus(TANK, descrition_only){
 	if(descrition_only != undefined)
 		return 'Send virus to deactivate enemy for short period.';
 		
-	var reuse = 20000;			reuse = 1000;
+	var reuse = 20000;
 	var duration = 5000;
 	var range = 70;
 		
@@ -463,7 +469,7 @@ function draw_virus_marker(tank_id){
 	//some drawings
 	if(TANK['try_stun'] != undefined && TANK.name == name){
 		img = new Image();
-		img.src = 'img/target.png';
+		img.src = '../img/target.png';
 		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
 		}
 	}
@@ -580,7 +586,7 @@ function Airstrike(TANK, descrition_only){
 		
 	var reuse = 10000;
 	var power = 70;
-	var range = 150;
+	var range = 120;
 	
 	if(TANK.try_airstrike != undefined){
 		delete TANK.try_airstrike;
@@ -605,7 +611,7 @@ function draw_airstrike_marker(tank_id){
 	//some drawings
 	if(TANK['try_airstrike'] != undefined && TANK.name == name){
 		img = new Image();
-		img.src = 'img/target.png';
+		img.src = '../img/target.png';
 		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
 		}
 	}
@@ -754,7 +760,7 @@ function draw_bomb_marker(tank_id){
 	//some drawings
 	if(TANK['try_bomb'] != undefined && TANK.name == name){
 		img = new Image();
-		img.src = 'img/target.png';
+		img.src = '../img/target.png';
 		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
 		}
 	}

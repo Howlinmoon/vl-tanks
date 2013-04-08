@@ -28,7 +28,7 @@ function on_keyboard_action(event){
 		}
 	if(k==13){
 		//enter
-		if(PLACE=='rooms' || PLACE=='room' || PLACE=='game' || PLACE=='select'){
+		if(PLACE=='rooms' || PLACE=='room' || PLACE=='game' || PLACE=='select' || PLACE=='score'){
 			if(chat_mode==0){
 				//begin write
 				chat_mode=1;
@@ -41,6 +41,14 @@ function on_keyboard_action(event){
 				document.getElementById("chat_write").style.visibility = 'hidden';
 				chat();
 				}
+			}
+		}
+	if(k==83){
+		//s
+		if(MAP_SCROLL_MODE==1) MAP_SCROLL_MODE = 2;
+		else{
+			MAP_SCROLL_MODE = 1;
+			auto_scoll_map();
 			}
 		}
 	
@@ -130,6 +138,7 @@ function on_mousedown(event){
 		}
 	mouse_click_pos = [mouseX, mouseY];
 	if(PLACE != 'game'){
+		menu_pressed = false;	
 		for(var i in BUTTONS){
 			if(BUTTONS[i].place != '' && BUTTONS[i].place != PLACE) continue;
 			if(mouseX < BUTTONS[i].x || mouseX > BUTTONS[i].x+BUTTONS[i].width)  continue;
@@ -153,7 +162,8 @@ function on_mousedown_back(event){
 	else if(event.layerX) {
 		mouseX = event.layerX;
 		mouseY = event.layerY;
-		}			
+		}
+	menu_pressed = false;		
 	for(var i in BUTTONS){
 		if(BUTTONS[i].place != '' && BUTTONS[i].place != PLACE) continue;
 		if(mouseX < BUTTONS[i].x || mouseX > BUTTONS[i].x+BUTTONS[i].width)  continue;
@@ -192,7 +202,8 @@ function on_mousedown_back(event){
 function on_mouseup_back(event){
 	if(PLACE=='game' && MAP_SCROLL_CONTROLL==true){
 		MAP_SCROLL_CONTROLL=false;
-		move_to_place_reset();
+		if(MAP_SCROLL_MODE==1)
+			move_to_place_reset();
 		}
 	}
 //fullscreen on modern browsers

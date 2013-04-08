@@ -1,2 +1,5 @@
-sync AI actions
-sync every bullet? + enable accuracy
+bugs:
+	full screen statusbar
+	sync bullets, accuracy?
+soldiers in multiplayer
+	sync AI actions

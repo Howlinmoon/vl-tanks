@@ -82,6 +82,8 @@ function joinRoomsListener(e){
 	waiting_users = Rooms_obj.getNumOccupants();
 	if(PLACE=='rooms')
 		draw_rooms_list();
+	else if(PLACE=='room')
+		draw_room(opened_room_id);
 	}
 function joinRoomListener_id(e){
 	if(room_id_to_join != -1){
@@ -93,19 +95,21 @@ function joinRoomListener_id(e){
 //client joins room
 function addOccupantListener (e) {
 	if (Rooms_obj.getSyncState() != net.user1.orbiter.SynchronizationState.SYNCHRONIZING) { 
-		if(PLACE=='rooms'){
-			waiting_users = Rooms_obj.getNumOccupants();
+		waiting_users = Rooms_obj.getNumOccupants();
+		if(PLACE=='rooms')
 			draw_rooms_list();
-			}
+		else if(PLACE=='room')
+			draw_room(opened_room_id);
 		}
 	}
 function addOccupantListener_id (e) {}
 //client leaves room
 function removeOccupantListener (e) {
-	if(PLACE=='rooms'){
-		waiting_users = Rooms_obj.getNumOccupants();
+	waiting_users = Rooms_obj.getNumOccupants();
+	if(PLACE=='rooms')
 		draw_rooms_list();
-		}
+	else if(PLACE=='room')
+		draw_room(opened_room_id);
 	}
 function removeOccupantListener_id (e) {}
 //do clean disconnect from server
@@ -272,11 +276,15 @@ function get_packet(fromClient, message){
 			}
 		}
 	else if(type == 'prepare_game'){	//prepare game - select tanks/maps screen
-		if(PLACE=="room" && opened_room_id==DATA){
+		//DATA = [room_id, host_enemy_name]
+		if(PLACE=="room" && opened_room_id==DATA[0]){
 			game_mode = 2;
 			start_game_timer_id = setInterval(starting_game_timer_handler, 1000);
 			draw_tank_select_screen();
-			ROOM = get_room_by_id(DATA);
+			ROOM = get_room_by_id(DATA[0]);
+			ROOM.host_enemy_name = DATA[1];
+			ROOM.players_max = ROOM.players.length;
+			ROOM.players_on = ROOM.players.length;
 			if(ROOM.host==name && ROOM.settings[0] != 'normal'){
 				choose_and_register_tanks(ROOM);
 				}
@@ -330,13 +338,17 @@ function get_packet(fromClient, message){
 	else if(type == 'leave_game'){		//player leaving game
 		//DATA = [room_id, player_name]
 		chat(DATA[1]+" left the game.", false, false);
+		ROOM = get_room_by_id(DATA[0]);
+		if(ROOM.host == DATA[1])	//host left game ... we are in trouble, unless we switch host to other person
+			ROOM.host = ROOM.host_enemy_name;
+		ROOM.players_on--;
 		}
 	else if(type == 'tank_move'){		//tank move
 		//DATA = room_id, player, [from_x, from_y, to_x, to_y, lock] 
 		if(DATA[1] == name && muted==false){
 			try{
 				audio_finish = document.createElement('audio');
-				audio_finish.setAttribute('src', 'sounds/click.ogg');
+				audio_finish.setAttribute('src', '../sounds/click.ogg');
 				audio_finish.play();
 				}
 			catch(error){}
@@ -344,8 +356,8 @@ function get_packet(fromClient, message){
 		if(PLACE=="game" && opened_room_id==DATA[0]){
 			TANK = get_tank_by_name(DATA[1]);
 			if(TANK===false) console.log('Error: tank "'+DATA[1]+'" was not found on tank_move.');
-			TANK.x = DATA[2][0];
-			TANK.y = DATA[2][1];
+			//TANK.x = DATA[2][0];
+			//TANK.y = DATA[2][1];
 			TANK.move = 1;
 			TANK.move_to = [DATA[2][2], DATA[2][3]];
 			delete TANK.target_move_lock;
@@ -385,6 +397,7 @@ function get_packet(fromClient, message){
 		if(PLACE=='game' && DATA[0] != opened_room_id) return false;
 		if(PLACE=='room' && DATA[0] != opened_room_id) return false;
 		if(PLACE=='select' && DATA[0] != opened_room_id) return false;
+		if(PLACE=='score' && DATA[0] != opened_room_id) return false;
 		if(DATA[2] != name)
 			chat(DATA[1], DATA[2], DATA[3]);
 		}
@@ -421,9 +434,7 @@ function get_packet(fromClient, message){
 			return false;
 			}
 		
-		//actions
-		if(TANK_TO.deaths == undefined)	TANK_TO.deaths = 1;
-		else				TANK_TO.deaths = TANK_TO.deaths + 1;
+		TANK_TO.deaths = TANK_TO.deaths + 1;
 		
 		if(TYPES[TANK_TO.type].name == "Tower"){
 			//change base stats
@@ -447,15 +458,21 @@ function get_packet(fromClient, message){
 		//adding kill stats
 		if(TYPES[TANK_TO.type].no_repawn == undefined){
 			//player
-			if(TANK_FROM.kills == undefined)	TANK_FROM.kills = 1;
-			else					TANK_FROM.kills = TANK_FROM.kills + 1;	
+			TANK_FROM.kills = TANK_FROM.kills + 1;	
 			//score
-			if(TANK_FROM.score == undefined)
-				TANK_FROM.score = 0;
 			TANK_FROM.score = TANK_FROM.score + 20;	// +20 for kill
 			
 			death(TANK_TO);
 			}
+		}
+	else if(type == 'level_up'){	//tank leveled up
+		//DATA = room_id, player_id, level
+		TANK_TO = get_tank_by_id(DATA[1]);
+		if(TANK_TO===false){	
+			console.log('Error: tank_to "'+DATA[1]+'" was not found on level_up.');
+			return false;
+			}
+		TANK_TO.level = DATA[2];
 		}
 	}
 //sending action to other players
@@ -479,16 +496,17 @@ function register_tank_action(action, room_id, player, data){			//lots of broadc
 	else if(action=='ask_rooms')
 		send_packet('ask_rooms', player);
 	else if(action=='prepare_game')
-		send_packet('prepare_game', room_id);
+		send_packet('prepare_game', [room_id, player]);
 	else if(action=='start_game')
 		send_packet('start_game', room_id);
 	else if(action=='change_tank')
 		send_packet('change_tank', [room_id, data, player]);
 	else if(action=='kill')
 		send_packet('tank_kill', [room_id, player, data]);
-	else if(action=='skill_advanced'){
+	else if(action=='skill_advanced')
 		send_packet('skill_advanced', [room_id, player, data]);
-		}
+	else if(action=='level_up')
+		send_packet('level_up', [room_id, player, data]);
 	else if(action=='leave_room'){
 		for(var i in ROOMS){
 			if(ROOMS[i].id == room_id){
@@ -519,19 +537,11 @@ function register_tank_action(action, room_id, player, data){			//lots of broadc
 	}
 //new room was created
 function register_new_room(room_name, mode, type, max_players, map){
-	//find max id
-	var max_id=0;
-	for(var t in ROOMS){
-		if(ROOMS[t].id>max_id)
-			max_id = ROOMS[t].id;
-		}
-	max_id=max_id+1;
-	
 	var players = [];
 	players.push({name: name, team: 'B'});
 	
 	ROOM = {
-		id: max_id,
+		id: Math.floor(Math.random()*9999999),
 		name: room_name,
 		settings: [mode, type, map],
 		max: max_players,
@@ -556,7 +566,9 @@ function get_waiting_players_count(){
 	}
 function disconnect_game(e){
 	if(PLACE=='game' && game_mode == 2){
-		if(confirm("Do you really want to quit game???")==false)
+		if(confirm("Do you really want to quit game???")==false){
 			return false;
+			}
+		register_tank_action('leave_game', opened_room_id, name);
 		}
 	}

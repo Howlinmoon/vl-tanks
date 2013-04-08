@@ -12,15 +12,18 @@ var canvas_main = canvas_base.getContext("2d");						//moving objects layer
 var SOCKET = ['tryunion.com', '80'];	//socket server //unionplatform.com - amazing service
 var FPS = 25;				//frames per second
 var settings_font = "bold 18px Helvetica";	//default font for settings buttons
-var START_GAME_COUNT_SINGLE=3;		//second how much to count in singleplayer
-var START_GAME_COUNT_MULTI=5;		//second how much to count in multiplayer
+var START_GAME_COUNT_SINGLE=10;		//second how much to count in singleplayer
+var START_GAME_COUNT_MULTI=10;		//second how much to count in multiplayer
 var WIDTH_APP = 800;			//application width
 var HEIGHT_APP = 525;			//application height
 var HEIGHT_STATUS_AREA = 171;		//status are height
 var SOCKET_ROOM_PREFIX = 'mv_';		//unique prefix for sockets library
-var MAX_SENT_PACKETS = 120;		//max packets, that we can send to server per game, on stable should be 1000+?
+var MAX_SENT_PACKETS = 5000;		//max packets, that we can send to server per game
 var NETWORK_PACKETS_LOG = false;	//if show sent and received packets log
-var VERSION = "1.1.8";			//app version
+var INFO_HEIGHT = 130;			//height of information block
+var STATUS_HEIGHT = 25;			//height of statusbar
+var MINI_MAP_PLACE = [13, 13, 104, 104, 3];	//x, y, width, height, border width
+var VERSION = "1.1.13";			//app version
 
 //other global variables
 var TANKS = new Array();		//tanks array
@@ -41,12 +44,10 @@ var APP_SIZE_CACHE = [WIDTH_APP, HEIGHT_APP]; //original app dimensions cache
 var muted=false;			//if sound muted
 var level = 1;				//map index
 var name="user-"+Math.floor(Math.random()*9999);	//user name
-var me_server = true;			//if me is server
 var my_tank_nr = -1;			//my tank type: [0,1...n]
 var audio_main;				//main audio track controller
 var map_offset = [0, 0];		//map offest [x ,y], < 0, this is for map scrolling, if map bigger then canvas size
 var unique_id = 0;			//number for id generation
-var preview_id = [];			//tmp array for on_mousemove f-tion
 var timed_functions = [];		//timed functions array, for repeative exec.
 var mouse_move_controll = false;	//if external funtion takes mouse control
 var mouse_click_controll = false;	//if external funtion takes mouse clicks controll
@@ -68,8 +69,9 @@ var chat_mode=0;				//if 1, show textbox for writing
 var CHAT_LINES=new Array();		//chat array lines
 var MY_TANK;				//my tank
 var TO_RADIANS = Math.PI/180; 		//for rotating
-var SKILL_BUTTON = 55;			//skill button width and height
+var SKILL_BUTTON = 57;			//skill button width and height
 var MAP_SCROLL_CONTROLL = false;	//active if user scrolling map with mouse on mini map
+var MAP_SCROLL_MODE = 1;		//if 1, auto scroll, if 2, no auto scroll
 var room_id_to_join=-1;			//id of room, requested to join
 var render_mode = 'requestAnimationFrame';
 
