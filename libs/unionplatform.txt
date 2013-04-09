@@ -1,51 +1,51 @@
 //RoomManager
-RoomManager.prototype.createRoom = function (roomID, roomSettings, attributes, modules)		//create room
-RoomManager.prototype.sendMessage = function (messageName, rooms, includeSelf, filters)		//send message
-RoomManager.prototype.getAllRooms = function ()					//get rooms
-RoomManager.prototype.getRooms = function ()					//get rooms
-RoomManager.prototype.getRoom = function (roomID)				//get one room
-RoomManager.prototype.getNumRooms = function (qualifier)			//get rooms count
-RoomManager.prototype.observeRoom = function (roomID, password, pdateLevels)
-RoomManager.prototype.watchForRooms = function (roomQualifier)
-RoomManager.prototype.stopWatchingForRooms = function (roomQualifier)
-RoomManager.prototype.isWatchingQualifier = function (qualifier)
-RoomManager.prototype.joinRoom = function (roomID, password, updateLevels)
-RoomManager.prototype.hasCachedRoom = function (roomID)
-RoomManager.prototype.disposeCachedRooms = function ()
-RoomManager.prototype.roomIsKnown = function (roomID)
-RoomManager.prototype.getRoomIDs = function ()
-RoomManager.prototype.getRoomsWithQualifier = function (qualifier)
-RoomManager.prototype.getRoomClassRegistry = function ()
-RoomManager.prototype.clientIsKnown = function (clientID)
+RoomManager.createRoom = function (roomID, roomSettings, attributes, modules)		//create room
+RoomManager.sendMessage = function (messageName, rooms, includeSelf, filters)		//send message
+RoomManager.getAllRooms = function ()					//get rooms
+RoomManager.getRooms = function ()					//get rooms
+RoomManager.getRoom = function (roomID)				//get one room
+RoomManager.getNumRooms = function (qualifier)			//get rooms count
+RoomManager.observeRoom = function (roomID, password, pdateLevels)
+RoomManager.watchForRooms = function (roomQualifier)
+RoomManager.stopWatchingForRooms = function (roomQualifier)
+RoomManager.isWatchingQualifier = function (qualifier)
+RoomManager.joinRoom = function (roomID, password, updateLevels)
+RoomManager.hasCachedRoom = function (roomID)
+RoomManager.disposeCachedRooms = function ()
+RoomManager.roomIsKnown = function (roomID)
+RoomManager.getRoomIDs = function ()
+RoomManager.getRoomsWithQualifier = function (qualifier)
+RoomManager.getRoomClassRegistry = function ()
+RoomManager.clientIsKnown = function (clientID)
 
 //rooms
-Room.prototype.join = function (password, updateLevels)				//join room
-Room.prototype.leave = function ()						//leave room
-Room.prototype.setRoomID = function (roomID)
-Room.prototype.getRoomID = function ()
-Room.prototype.getSimpleRoomID = function ()
-Room.prototype.getQualifier = function ()
-Room.prototype.sendMessage = function (messageName, includeSelf, filters)
+Room.join = function (password, updateLevels)				//join room
+Room.leave = function ()						//leave room
+Room.setRoomID = function (roomID)
+Room.getRoomID = function ()
+Room.getSimpleRoomID = function ()
+Room.getQualifier = function ()
+Room.sendMessage = function (messageName, includeSelf, filters)
 
 //listeners
 addEventListener(type, listener);
 removeEventListener(type, listener);
-Room.prototype.addMessageListener = function (message, listener, thisArg)	//add listener
-Room.prototype.removeMessageListener = function (message, listener)		//removes listener
-Room.prototype.hasMessageListener = function (message, listener)
+Room.addMessageListener = function (message, listener, thisArg)	//add listener
+Room.removeMessageListener = function (message, listener)		//removes listener
+Room.hasMessageListener = function (message, listener)
 
 //members
-Room.prototype.getNumOccupants = function ()					//get users
-Room.prototype.removeOccupant = function (clientID)
-Room.prototype.addOccupant = function (client)
-Room.prototype.getOccupantIDs = function ()
-Room.prototype.getOccupants = function ()
-Room.prototype.clientIsInRoom = function (clientID)
+Room.getNumOccupants = function ()					//get users
+Room.removeOccupant = function (clientID)
+Room.addOccupant = function (client)
+Room.getOccupantIDs = function ()
+Room.getOccupants = function ()
+Room.clientIsInRoom = function (clientID)
 
 //misc
-Room.prototype.getSyncState = function ()
-Room.prototype.setUpdateLevels = function (updateLevels)
-Room.prototype.observe = function (password, updateLevels)
+Room.getSyncState = function ()
+Room.setUpdateLevels = function (updateLevels)
+Room.observe = function (password, updateLevels)
 
 //shut down room
 try{
