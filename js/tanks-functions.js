@@ -1,6 +1,6 @@
 //====== GENERAL ===============================================================
 
-function Soldiers(TANK, descrition_only){
+function Soldiers(TANK, descrition_only){		return false;
 	var reuse = 30000;
 	var n = 3;
 	if(descrition_only != undefined)
