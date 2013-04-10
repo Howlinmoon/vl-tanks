@@ -19,20 +19,16 @@ function draw_tank(tank){
 		}
 	else{
 		visibility = 1;
-		if(tank.dead == 1 && tank.death_respan != undefined){
-			tank_size = tank_size/2;
-			//return false;
-			}
-		if(tank.dead == 1 && tank.death_respan == undefined){
+		//dead
+		if(tank.dead == 1){
 			tank_size = tank_size/2;
 			}
 		//invisibility
 		if(tank.invisibility == 1)
 			tank_size = tank_size*0.8;
-		
-		if(check_enemy_visibility(tank)==false){
-			return false;	//out of sight
-			}
+		//out of sight
+		if(check_enemy_visibility(tank)==false)
+			return false;	
 		
 		lighten_pixels(tank);
 		
@@ -41,6 +37,7 @@ function draw_tank(tank){
 		var cache_id = "";
 		cache_id += "T:"+tank.type+',';
 		cache_id += "A:"+tank.angle+',';
+		cache_id += "Si:"+tank_size+',';
 		for (i in tank.extra_icon)
 			cache_id += "E:"+tank.extra_icon[i][0]+',';
 		if(tank.stun != undefined)	cache_id += 'ST,';
@@ -54,12 +51,11 @@ function draw_tank(tank){
 		if(TYPES[tank.type].icon_top[0] != undefined)
 			cache_id += "SA:"+tank.fire_angle+',';
 		
-		if(tank.cache_tank != undefined && tank.cache_tank.unique == cache_id && tank.cache_tank_verified==2 ){
+		if(tank.cache_tank != undefined && tank.cache_tank.unique == cache_id && tank.images_loaded > 1){
 			//read from cache
 			canvas_main.drawImage(tank.cache_tank.object, round(tank.x+map_offset[0])-padding, round(tank.y+map_offset[1])-padding);
 			}
 		else{
-			tank.cache_tank_verified = 0;
 			//create tmp
 			var tmp_canvas = document.createElement('canvas');
 			tmp_canvas.width = 105
@@ -113,8 +109,11 @@ function draw_tank(tank){
 			//draw tank base
 			img_me = new Image();
 			img_me.src = '../img/tanks/'+TYPES[tank.type].name+'/'+TYPES[tank.type].icon_base[0];
-			img_me.onload = function(){
-				tank.cache_tank_verified++;
+			if(tank.images_loaded<2){
+				img_me.onload = function(){
+					if(tank.images_loaded<2)
+						tank.images_loaded++;
+					}
 				}
 			if(TYPES[tank.type].icon_base[1] == "no-rotate"){
 				//draw without rotation
@@ -133,16 +132,29 @@ function draw_tank(tank){
 			
 			//draw top
 			if(TYPES[tank.type].icon_top[0] != undefined){
-				tmp_object.save();
-				img_me = new Image();
-				img_me.src = '../img/tanks/'+TYPES[tank.type].name+'/'+TYPES[tank.type].icon_top[0];
-				img_me.onload = function(){
-					tank.cache_tank_verified++;
+				if(tank.dead != 1){
+					tmp_object.save();
+					img_me = new Image();
+					img_me.src = '../img/tanks/'+TYPES[tank.type].name+'/'+TYPES[tank.type].icon_top[0];
+					if(tank.images_loaded<2){
+						img_me.onload = function(){
+							if(tank.images_loaded<2)
+								tank.images_loaded += 1000;
+							}
+						}
+					tmp_object.translate(round(tank_size/2)+padding, round(tank_size/2)+padding);
+					tmp_object.rotate(tank.fire_angle * TO_RADIANS);
+					tmp_object.drawImage(img_me, -(tank_size/2), -(tank_size/2), tank_size, tank_size);
+					tmp_object.restore();
 					}
-				tmp_object.translate(round(tank_size/2)+padding, round(tank_size/2)+padding);
-				tmp_object.rotate(tank.fire_angle * TO_RADIANS);
-				tmp_object.drawImage(img_me, -(tank_size/2), -(tank_size/2), tank_size, tank_size);
-				tmp_object.restore();
+				else{
+					if(tank.images_loaded<2)
+						tank.images_loaded++;
+					}
+				}
+			else{
+				if(tank.images_loaded<2)
+					tank.images_loaded++;
 				}
 
 			//draw extra layer
@@ -265,6 +277,12 @@ function draw_tank_move(mouseX, mouseY){
 		delete MY_TANK.try_mortar;
 		delete MY_TANK.try_bomb;
 		delete MY_TANK.try_airstrike;
+		if(MY_TANK.invisibility != undefined){
+			if(game_mode == 2)
+				send_packet('del_invisible', [MY_TANK.id]);
+			else
+				delete MY_TANK.invisibility;
+			}
 		
 		if(MY_TANK.death_respan != undefined) return false;
 			
@@ -308,9 +326,9 @@ function draw_tank_move(mouseX, mouseY){
 		//register
 		if(game_mode == 2){
 			if(found_something==true)
-				register_tank_action('move', opened_room_id, name, [round(MY_TANK.x), round(MY_TANK.y), round(mouseX), round(mouseY), target_lock_id]);
+				register_tank_action('move', opened_room_id, MY_TANK.id, [round(MY_TANK.x), round(MY_TANK.y), round(mouseX), round(mouseY), target_lock_id]);
 			else
-				register_tank_action('move', opened_room_id, name, [round(MY_TANK.x), round(MY_TANK.y), round(mouseX), round(mouseY)]);
+				register_tank_action('move', opened_room_id, MY_TANK.id, [round(MY_TANK.x), round(MY_TANK.y), round(mouseX), round(mouseY)]);
 			//MY_TANK.move = 0;
 			return false;
 			}
@@ -330,55 +348,53 @@ function draw_tank_move(mouseX, mouseY){
 		}
 	}
 //check collisions
-function check_collisions(xx, yy, TANK, mode){
+function check_collisions(xx, yy, TANK){
 	if(TYPES[TANK.type].no_collisions != undefined) return false;
 	xx = Math.round(xx);
 	yy = Math.round(yy);
 	var tank_size_half = round(TYPES[TANK.type].size[1]/2);
-	if(TYPES[TANKS[i].type].type == 'human')
-		tank_size_half = round(tank_size_half/2);	//soldiers small
 
+	//borders
+	if(xx < 0 || yy < 0) return true;
+	if(xx > WIDTH_MAP || yy > HEIGHT_MAP) return true;
+	
 	//elements
-	if(mode == undefined || mode == 'elements'){	
-		for(var e in MAPS[level-1].elements){
-			var element = get_element_by_name(MAPS[level-1].elements[e][0]);
-			if(element.collission == false) continue;
-			
-			var elem_width = element.size[0];
-			var elem_height = element.size[1];
-			var elem_x = MAPS[level-1].elements[e][1];
-			var elem_y = MAPS[level-1].elements[e][2];
-			if(element.size[0]<30)	elem_x = elem_x - round(element.size[0]/2);
-			if(element.size[1]<30)	elem_y = elem_y - round(element.size[1]/2);
-			if(MAPS[level-1].elements[e][3]!=0 && MAPS[level-1].elements[e][3] < elem_width)
-				elem_width = MAPS[level-1].elements[e][3];
-			if(MAPS[level-1].elements[e][4]!=0 && MAPS[level-1].elements[e][4] < elem_height)
-				elem_height = MAPS[level-1].elements[e][4];
-			//check
-			if(yy > elem_y && yy < elem_y+elem_height){
-				if(xx > elem_x && xx < elem_x+elem_width){
-					return true;
-					}
+	for(var e in MAPS[level-1].elements){
+		var element = get_element_by_name(MAPS[level-1].elements[e][0]);
+		if(element.collission == false) continue;	
+		
+		var elem_width = element.size[0];
+		var elem_height = element.size[1];
+		var elem_x = MAPS[level-1].elements[e][1];
+		var elem_y = MAPS[level-1].elements[e][2];
+		if(element.size[0]<30)	elem_x = elem_x - round(element.size[0]/2);
+		if(element.size[1]<30)	elem_y = elem_y - round(element.size[1]/2);
+		if(MAPS[level-1].elements[e][3]!=0 && MAPS[level-1].elements[e][3] < elem_width)
+			elem_width = MAPS[level-1].elements[e][3];
+		if(MAPS[level-1].elements[e][4]!=0 && MAPS[level-1].elements[e][4] < elem_height)
+			elem_height = MAPS[level-1].elements[e][4];
+		//check
+		if(yy > elem_y && yy < elem_y+elem_height){
+			if(xx > elem_x && xx < elem_x+elem_width){
+				return true;
 				}
 			}
 		}
 
 	//other tanks
-	if(mode == undefined || mode == 'tanks'){	
-		if(TYPES[TANK.type].types != 'tower'){
-			for (i in TANKS){
-				if(TANKS[i].id == TANK.id) continue;			//same tank
-				if(TYPES[TANK.type].type == 'tank' && TYPES[TANKS[i].type].type == 'human') continue;	//tanks can go over soldiers
-				if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'tank') continue;	//soldiers can go over tanks, why? see above
-				if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'human') continue;	//soldier can go over soldiers ...
-				if(TANKS[i].dead == 1) continue;		//tank dead
-				var size2 = TYPES[TANKS[i].type].size[1];
-				if(TYPES[TANKS[i].type].type == 'human')	
-					size2 = round(size2/2);	//soldiers small
-				if(xx > TANKS[i].x && xx < TANKS[i].x+size2){
-					if(yy > TANKS[i].y && yy < TANKS[i].y+size2){
-						return true;
-						}
+	if(TYPES[TANK.type].types != 'tower'){
+		for (i in TANKS){
+			if(TANKS[i].id == TANK.id) continue;			//same tank
+			if(TYPES[TANK.type].type == 'tank' && TYPES[TANKS[i].type].type == 'human') continue;	//tanks can go over soldiers
+			if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'tank') continue;	//soldiers can go over tanks, why? see above
+			if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'human') continue;	//soldier can go over soldiers ...
+			if(TANKS[i].dead == 1) continue;		//tank dead
+			var size2 = TYPES[TANKS[i].type].size[1];
+			if(TYPES[TANKS[i].type].type == 'human')	
+				size2 = round(size2/2);	//soldiers small
+			if(xx > TANKS[i].x && xx < TANKS[i].x+size2){
+				if(yy > TANKS[i].y && yy < TANKS[i].y+size2){
+					return true;
 					}
 				}
 			}
@@ -487,7 +503,10 @@ function check_enemies(TANK){
 			&& TANKS[i_locked].dead != 1 
 			&& TANKS[i_locked].invisibility != 1
 			){
-		delete TANK.invisibility;
+		if(game_mode == 2)
+			send_packet('del_invisible', [TANK.id]);
+		else
+			delete TANK.invisibility;
 		i = i_locked;
 		//exact range
 		dist_x = TANKS[i].x+TYPES[TANKS[i].type].size[1]/2 - (TANK.x+tank_size_from);
@@ -843,6 +862,8 @@ function death(tank){
 	tank.move = 0;
 	tank.death_respan = 2*1000+Date.now();
 	tank.dead = 1;
+	tank.x += TYPES[tank.type].size[1]/4;
+	tank.y += TYPES[tank.type].size[1]/4;
 	
 	//renew specials
 	delete tank.ability_1_in_use;
@@ -1076,6 +1097,21 @@ function get_team_tanks_count(team){
 		}
 	return n;
 	}
+function sync_movement(TANK, xx, yy){
+	var MAX_ALLOED_DIFFERENCE = 100;
+	if(TANK===false) return false;
+	if(TYPES[TANK.type].type == 'tower') return false;
+	if(TANK.id != MY_TANK.id){
+		//get distance
+		dist_x = TANK.x+TYPES[TANK.type].size[1]/2 - (xx+TYPES[TANK.type].size[1]/2);
+		dist_y = TANK.y+TYPES[TANK.type].size[1]/2 - (yy+TYPES[TANK.type].size[1]/2);
+		distance = Math.sqrt((dist_x*dist_x)+(dist_y*dist_y));
+		if(distance > MAX_ALLOED_DIFFERENCE){
+			TANK.x = xx;
+			TANK.y = yy;
+			}
+		}
+	}
 function add_tank(level, id, name, type, team, x, y, angle, AI, master_tank){
 	if(type==undefined) type = 0;
 	var space = 35;
@@ -1121,6 +1157,8 @@ function add_tank(level, id, name, type, team, x, y, angle, AI, master_tank){
 		kills: 0,
 		deaths: 0,
 		cache_tank: [],
+		images_loaded: 2,
+		last_bullet_time: Date.now()-5000,
 		};
 	if(AI != undefined)
 		TANK.use_AI = AI;
