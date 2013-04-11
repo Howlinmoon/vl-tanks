@@ -296,7 +296,7 @@ TYPES.push({
 	name: 'Tower',
 	type: 'tower',
 	description: ["Tower for defence"],
-	life: [10000,0],
+	life: [1000,0],
 	damage: [30, 0],	//30 dps
 	range: 120,
 	scout: 120,
