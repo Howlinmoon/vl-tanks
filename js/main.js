@@ -19,10 +19,8 @@ function init_game(first_time){
 	unique_id = 0;
 	level = 1;
 	//set width and height
-	if(first_time==true){
-		prepare_maps();
+	if(first_time==true)
 		check_canvas_sizes();
-		}
 	
 	//logo backround color
 	canvas_backround.fillStyle = "#676767";
@@ -331,16 +329,14 @@ function init_action(map_nr, my_team){
 	
 	//auto add 1 lvl upgrade
 	for(ii in TANKS){
-		if(TYPES[TANKS[ii].type].abilities.length != 0 ){
-			for(jj in TYPES[TANKS[ii].type].abilities){ 
-				var nr = 1+parseInt(jj);
-				var ability_function = TYPES[TANKS[ii].type].abilities[jj].name.replace(/ /g,'_')+"_once";
-				if(ability_function != undefined){
-					try{
-						window[ability_function](TANKS[ii]);
-						}
-					catch(err){	}
+		for(jj in TYPES[TANKS[ii].type].abilities){ 
+			var nr = 1+parseInt(jj);
+			var ability_function = TYPES[TANKS[ii].type].abilities[jj].name.replace(/ /g,'_')+"_once";
+			if(ability_function != undefined){
+				try{
+					window[ability_function](TANKS[ii]);
 					}
+				catch(err){	}
 				}
 			}
 		}

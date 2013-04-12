@@ -271,7 +271,7 @@ function draw_create_room(game_players, game_mode, game_type, game_map){
 	text = "Game Mode:";
 	canvas_backround.fillText(text, 10+15, 60+25+offset_top);
 	
-	values = ['normal', 'random', 'mirror'/*, 'counter'*/];
+	values = ['normal', 'random', 'mirror', 'counter'];
 	for(var i in values){
 		//block
 		canvas_backround.strokeStyle = "#000000";
