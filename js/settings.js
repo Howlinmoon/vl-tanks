@@ -25,7 +25,7 @@ var MINI_MAP_PLACE = [13, 13, 104, 104, 3];	//x, y, width, height, border width
 var SKILL_BUTTON = 55;			//skill button width and height
 var DEBUG = false;			//show debug info
 var SCORES_INFO = [10, 40, -20, 50, 100];	//level up, kill, death, per tower, win bonus
-var VERSION = "1.2.4";			//app version
+var VERSION = "1.2.5";			//app version
 
 //other global variables
 var TANKS = new Array();		//tanks array
@@ -78,6 +78,7 @@ var room_id_to_join=-1;			//id of room, requested to join
 var render_mode = 'requestAnimationFrame';	//render mode
 var page_title_copy = '';		//copy of original title
 var packets_used = 0;			//sent packets count in 1 game, there is limit...
+var packets_all = 0;			//received packets count in 1 game
 var shift_pressed = false;		//if shift is pressed
 var chat_shifted = false;		//if chat was activated with shift
 

@@ -219,8 +219,8 @@ TYPES.push({
 	description: ["Missiles", "Medium armor", "Strong against all"],
 	life: [150, 10],
 	damage: [20, 1],	//20 dps
-	range: 80,
-	scout: 110,
+	range: 80,			range: 200,
+	scout: 110,			damage: [200, 1],
 	armor: [40, 0.5, 50],	
 	speed: 30,
 	attack_delay: 1,

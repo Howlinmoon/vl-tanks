@@ -15,6 +15,7 @@ HTML5 based tank game. Requires Firefox, Chrome or Opera. IE10 and Safari does n
 * or download and open index.html in modern browser to play dev version
 
 ## Latest News
+* added started room progress
 * improved AI
 * new game mode
 * new map

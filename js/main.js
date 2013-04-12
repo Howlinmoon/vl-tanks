@@ -426,8 +426,9 @@ function quit_game(init_next_game){
 		opened_room_id = -1;
 		}
 	try{
-		parent.document.getElementById("messages_in").innerHTML = 0;
-		parent.document.getElementById("messages_out").innerHTML = 0;
+		parent.document.getElementById("packets").innerHTML = "0/0";
+		parent.document.getElementById("fps").innerHTML = "";	
+
 		}catch(error){}
 	
 	//reset other variables
@@ -450,6 +451,7 @@ function quit_game(init_next_game){
 	my_tank_nr = -1;
 	document.getElementById("chat_write").style.visibility = 'hidden';
 	packets_used=0;
+	packets_all=0;
 	shift_pressed = false;
 	chat_shifted=false;
 	
