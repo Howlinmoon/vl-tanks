@@ -24,7 +24,7 @@ TYPES.push({
 	icon_base: ['base1.png'],			//tank top images
 	preview: 'preview.png',				//tank preview image
 	bullet: 'bullet.png',				//bullet_image
-	fire_sound: 'shoot.ogg',			//shooting sound
+	fire_sound: 'shoot',				//shooting sound
 	accuracy: 90,					//chance to hit target, %
 	});
 
@@ -50,7 +50,7 @@ TYPES.push({
 	icon_top: ['top1.png'],
 	icon_base: ['base1.png'],
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -77,7 +77,7 @@ TYPES.push({
 	icon_top: ['top1.png'],
 	icon_base: ['base1.png'],
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -103,7 +103,7 @@ TYPES.push({
 	icon_top: ['top1.png'],
 	icon_base: ['base1.png'],
 	bullet: 'missle.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 100,
 	});
 
@@ -130,7 +130,7 @@ TYPES.push({
 	icon_top: ['top1.png'],
 	icon_base: ['base1.png'],
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 80,
 	});
 
@@ -157,7 +157,7 @@ TYPES.push({
 	icon_base: ['base1.png'],
 	preview: 'preview.png',
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -183,7 +183,7 @@ TYPES.push({
 	icon_base: ['base1.png'],
 	preview: 'preview.png',
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -209,7 +209,7 @@ TYPES.push({
 	icon_base: ['base1.png'],
 	preview: 'preview.png',
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -238,7 +238,7 @@ TYPES.push({
 	icon_base: ['base1.png'],
 	preview: 'preview.png',
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -267,7 +267,7 @@ TYPES.push({
 	icon_base: ['base1.png'],
 	preview: 'preview.png',
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -291,7 +291,7 @@ TYPES.push({
 	icon_top: [],
 	icon_base: ['base1.png'],
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -300,13 +300,13 @@ TYPES.push({
 	name: 'Tower',
 	type: 'tower',
 	description: ["Tower for defence"],
-	life: [1500,0],
+	life: [2000,0],
 	damage: [30, 0],	//30 dps
 	range: 120,
 	scout: 130,
 	armor: [20,0,20],
 	speed: 0,
-	attack_delay: 1,
+	attack_delay: 1.1,
 	turn_speed: 4,
 	no_repawn: 1,
 	abilities: [],
@@ -315,7 +315,7 @@ TYPES.push({
 	icon_top: ['top1.png'],
 	icon_base: ['base1.png'],
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
@@ -324,13 +324,13 @@ TYPES.push({
 	name: 'Base',
 	type: 'tower',
 	description: ["Main base"],
-	life: [3000, 0],
+	life: [3500, 0],
 	damage: [45, 0],	//45 dps
 	range: 120,
 	scout: 130,
 	armor: [50,0,50],
 	speed: 0,
-	attack_delay: 1,
+	attack_delay: 1.1,
 	turn_speed: 4,
 	no_repawn: 1,
 	abilities: [],
@@ -339,6 +339,6 @@ TYPES.push({
 	icon_top: [],
 	icon_base: ['base1.png', 'no-rotate'],
 	bullet: 'bullet.png',
-	fire_sound: 'shoot.ogg',
+	fire_sound: 'shoot',
 	accuracy: 90,
 	});
