@@ -37,6 +37,10 @@ function Soldiers(TANK, descrition_only, settings_only, ai){
 	
 	return reuse;
 	}
+function Range(TANK, descrition_only, settings_only, ai){
+	if(descrition_only != undefined)
+		return 'Tank range is increased. Passive ability.';
+	}
 
 //====== Heavy =================================================================
 
@@ -72,6 +76,10 @@ function Rest(TANK, descrition_only, settings_only, ai){
 	timed_functions.push(tmp);
 	
 	return reuse;
+	}
+function Shield(TANK, descrition_only, settings_only, ai){
+	if(descrition_only != undefined)
+		return 'Tank use heavy armor. Passive ability.';
 	}
 function Rest_stop(object){
 	var TANK = object.tank;
@@ -121,6 +129,10 @@ function Berserk(TANK, descrition_only, settings_only, ai){
 	
 	return reuse;
 	}
+function Damage(TANK, descrition_only, settings_only, ai){
+	if(descrition_only != undefined)
+		return 'Tank do huge damage. Passive ability.';
+	}
 function Berserk_stop(object){
 	var TANK = object.tank;
 	TANK.speed = TYPES[TANK.type].speed;
@@ -133,7 +145,7 @@ function Berserk_stop(object){
 
 //====== Cruiser ===============================================================
 
-function Fleet(TANK, descrition_only, settings_only, ai){
+function Turbo(TANK, descrition_only, settings_only, ai){
 	var reuse = 20000;
 	var duration = 4000;
 	var power = 8;
@@ -147,7 +159,7 @@ function Fleet(TANK, descrition_only, settings_only, ai){
 	TANK.speed = TANK.speed + power;
 	//register stop function	
 	var tmp = new Array();
-	tmp['function'] = "Fleet_stop";
+	tmp['function'] = "Turbo_stop";
 	tmp['duration'] = duration;
 	tmp['type'] = 'ON_END';
 	tmp['tank'] = TANK;
@@ -195,7 +207,7 @@ function Repair(TANK, descrition_only, settings_only, ai){
 	
 	return reuse;
 	}	
-function Fleet_stop(object){
+function Turbo_stop(object){
 	var TANK = object.tank;
 	TANK.speed = TYPES[TANK.type].speed;
 	}
@@ -218,8 +230,8 @@ function Repair_stop(object){
 
 function Mortar(TANK, descrition_only, settings_only, ai){
 	var reuse = 20000;
-	var power = 80 + 5 * (TANK.level-1);	
-	var range = 120;
+	var power = 80 + 5 * (TANK.level-1);
+	var range = 130;
 	var splash_range = 70;
 	
 	if(descrition_only != undefined)
@@ -250,10 +262,18 @@ function Mortar_once(TANK){
 function draw_mortar_marker(tank_id){
 	TANK = get_tank_by_id(tank_id);
 	//some drawings
-	if(TANK['try_mortar'] != undefined && TANK.name == name){
+	if(TANK.try_mortar != undefined && TANK.name == name){
+		//TARGET
 		img = new Image();
 		img.src = '../img/target.png';
 		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
+		
+		//circle
+		canvas_main.beginPath();
+		canvas_main.arc(mouse_pos[0], mouse_pos[1], TANK.try_mortar[1], 0 ,2*Math.PI, false);	
+		canvas_main.lineWidth = 1;
+		canvas_main.strokeStyle = "#c10000";
+		canvas_main.stroke();
 		}
 	}
 function do_mortar(tank_id, distance_ok, skip_broadcast){
@@ -355,12 +375,12 @@ function do_mortar(tank_id, distance_ok, skip_broadcast){
 //====== Sniper ================================================================
 
 function Camouflage(TANK, descrition_only, settings_only, ai){
-
-	var reuse = 15000;
-	var duration = 7000;
+	var reuse = 20000;
+	var duration = 5000;
+	var power_speed = 0.8;
 	
 	if(descrition_only != undefined)
-		return 'Slowly become invisible for '+(duration/1000)+'s while not shooting and moving.';
+		return 'Become invisible for '+(duration/1000)+'s. Speed is reduced by '+(100-power_speed*100)+'%';
 	if(settings_only != undefined)
 		return {reuse: reuse};
 	if(ai != undefined){
@@ -369,6 +389,7 @@ function Camouflage(TANK, descrition_only, settings_only, ai){
 	
 	TANK.abilities_reuse[0] = Date.now() + reuse;
 	TANK.invisibility = 1;
+	TANK.speed = round(TANK.speed * power_speed);
 	TANK.move = 0;
 	delete TANK.target_shoot_lock;
 	
@@ -384,13 +405,12 @@ function Camouflage(TANK, descrition_only, settings_only, ai){
 	}
 function Camouflage_stop(object){
 	var TANK = object.tank;
-	//TANK.speed = TYPES[TANK.type].speed;
+	TANK.speed = TYPES[TANK.type].speed;
 	delete TANK.invisibility;
 	}
 
 //====== Miner =================================================================
 
-var MINES = [];
 function Mine(TANK, descrition_only, settings_only, ai){
 	var reuse = 10000;
 	var power = 150 + 9 * (TANK.level-1);	
@@ -425,6 +445,7 @@ function SAM(TANK, descrition_only, settings_only, ai){
 	if(settings_only != undefined)
 		return {reuse: reuse};
 	
+	TANK.abilities_reuse[2] = Date.now() + reuse;
 	//find nearest enemy
 	var ENEMY_NEAR;
 	for (i in TANKS){				
@@ -444,7 +465,7 @@ function SAM(TANK, descrition_only, settings_only, ai){
 			ENEMY_NEAR = [range, i];
 		}
 	
-	//start missle
+	//start missile
 	if(ENEMY_NEAR != undefined){
 		var enemy = TANKS[ENEMY_NEAR[1]];
 		//find angle
@@ -490,7 +511,7 @@ function check_mines(tank_id){
 	var mine_size_half = 8;
 	for(var m in MINES){
 		for(var i in TANKS){
-			if(TYPES[TANKS[i].type].name=='Miner') continue;	//they resist it
+			if(TYPES[TANKS[i].type].name=='Miner') continue;	//they ignore it
 			if(TYPES[TANKS[i].type].type=='human') continue;	//they don't weight enough
 			if(TYPES[TANKS[i].type].no_collisions==1) continue;	//flying units dont care mines
 			if(TANKS[i].dead == 1) continue;			//ghost
@@ -505,6 +526,7 @@ function check_mines(tank_id){
 					tmp['bullet_to_area'] = [MINES[m].x, MINES[m].y];
 					tmp['bullet_from_target'] = tank;
 					tmp['aoe_effect'] = 1;
+					tmp['damage_all_teams'] = 1;
 					tmp['aoe_splash_range'] = MINES[m].splash_range;
 					tmp['damage'] =  MINES[m].damage;
 					BULLETS.push(tmp);
@@ -530,7 +552,7 @@ function Virus(TANK, descrition_only, settings_only, ai){
 		return 'Send virus to deactivate enemy and damage it with '+power+' power.';
 	if(settings_only != undefined)
 		return {reuse: reuse};
-		
+	
 	if(TANK.try_stun != undefined){
 		delete TANK.try_stun;
 		mouse_click_controll = false;
@@ -543,6 +565,41 @@ function Virus(TANK, descrition_only, settings_only, ai){
 	//return reuse - later, on use
 	return 0;
 	}
+function Mass_virus(TANK, descrition_only, settings_only, ai){
+	var reuse = 40000;
+	var power = 35 + 2 * (TANK.level-1);	
+	var duration = 2000;
+	var range = 40;
+
+	if(descrition_only != undefined)
+		return 'Send virus to all near enemies and damage it with '+power+' power.';
+	if(settings_only != undefined)
+		return {reuse: reuse};
+	
+	TANK.abilities_reuse[2] = Date.now() + reuse;
+	var tank_size = TYPES[TANK.type].size[1]/2;	
+	for (i in TANKS){				
+		if(TANKS[i].team == TANK.team)	continue;	//same team
+		if(TANKS[i].dead == 1)			continue;	//target dead
+		
+		//check
+		distance = get_distance_between_tanks(TANKS[i], TANK);
+		if(distance > range)			continue;	//target too far
+		
+		//bullet	
+		var tmp = new Array();
+		tmp['x'] = TANK.x+tank_size;
+		tmp['y'] = TANK.y+tank_size;
+		tmp['bullet_to_target'] = TANKS[i];
+		tmp['bullet_from_target'] = TANK;
+		tmp['damage'] = power;
+		tmp['stun_effect'] = duration;
+		BULLETS.push(tmp);
+		}
+		
+	return reuse;
+	}	
+	
 function Virus_once(TANK){
 	if(TANK.Virus_loaded == 1) return false;
 	if(TANK.abilities_lvl[0]==1)
@@ -912,7 +969,10 @@ function Autopilot(TANK, descrition_only, settings_only, ai){
 		return 'Turn autopilot on/off.';
 	if(settings_only != undefined)
 		return {reuse: reuse};
+	if(ai != undefined)
+		return false;
 		
+	TANK.abilities_reuse[3] = Date.now() + reuse;
 	//auto
 	if(ai != undefined)
 		return false;
@@ -937,10 +997,18 @@ function Bomb_once(TANK){
 function draw_bomb_marker(tank_id){
 	TANK = get_tank_by_id(tank_id);
 	//some drawings
-	if(TANK['try_bomb'] != undefined && TANK.name == name){
+	if(TANK.try_bomb != undefined && TANK.name == name){
+		//target
 		img = new Image();
 		img.src = '../img/target.png';
 		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
+		
+		//circle
+		canvas_main.beginPath();
+		canvas_main.arc(mouse_pos[0], mouse_pos[1], TANK.try_bomb[1], 0 ,2*Math.PI, false);	
+		canvas_main.lineWidth = 1;
+		canvas_main.strokeStyle = "#c10000";
+		canvas_main.stroke();
 		}
 	}
 function do_bomb(tank_id, distance_ok, skip_broadcast){

@@ -18,6 +18,7 @@ TYPES.push({
 	abilities: [					//name; skill icon; active or passive; broadcast activation in multiplayer? 0-no, 1-yes, 2-yes, but on later
 		{name: 'Rest',		passive: false,		broadcast: 1}, 
 		{name: 'Soldiers',	passive: false,		broadcast: 1}, 
+		{name: 'Shield',	passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],				//[tank size: S/M/L, icon width and height(same)]
 	icon_top: ['top1.png'],				//tank base images
@@ -36,7 +37,7 @@ TYPES.push({
 	life: [180, 12],
 	damage: [30, 2],	//30 dps
 	range: 80,
-	scout: 90,
+	scout: 100,
 	armor: [30, 0.3, 40],
 	speed: 25,
 	attack_delay: 1,
@@ -44,6 +45,7 @@ TYPES.push({
 	abilities: [
 		{name: 'Berserk',	passive: false,		broadcast: 1},
 		{name: 'Soldiers',	passive: false,		broadcast: 1}, 
+		{name: 'Damage',	passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
 	preview: 'preview.png',
@@ -61,14 +63,14 @@ TYPES.push({
 	description: ["Fast scout", "Repair for allies", "Light armor"],
 	life: [200, 12],
 	damage: [10, 0.5],	//10 dps
-	range: 90,
-	scout: 110,
+	range: 80,
+	scout: 100,
 	armor: [20, 0.3, 30],
 	speed: 32,
 	attack_delay: 1,
 	turn_speed: 5,
 	abilities: [
-		{name: 'Fleet',	passive: false,			broadcast: 1}, 
+		{name: 'Turbo',		passive: false,		broadcast: 1}, 
 		{name: 'Soldiers',	passive: false,		broadcast: 1}, 
 		{name: 'Repair',	passive: false,		broadcast: 1}, 
 		],
@@ -97,6 +99,7 @@ TYPES.push({
 	abilities: [
 		{name: 'Mortar',	passive: false,		broadcast: 2}, 
 		{name: 'Soldiers',	passive: false,		broadcast: 1}, 
+		{name: 'Range',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
 	preview: 'preview.png',
@@ -123,6 +126,7 @@ TYPES.push({
 	abilities: [
 		{name: 'Camouflage',	passive: false,		broadcast: 1}, 
 		{name: 'Soldiers',	passive: false,		broadcast: 1}, 
+		{name: 'Range',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
 	ignore_armor: 1,
@@ -142,7 +146,7 @@ TYPES.push({
 	life: [150, 10],
 	damage: [10, 0.5],	//10 dps
 	range: 80,
-	scout: 90,
+	scout: 100,
 	armor: [20, 0.3, 30],
 	speed: 30,
 	attack_delay: 1,
@@ -169,7 +173,7 @@ TYPES.push({
 	life: [160, 10],
 	damage: [10, 0.5],	//10 dps
 	range: 80,
-	scout: 90,
+	scout: 100,
 	armor: [30, 0.3, 40],	
 	speed: 30,
 	attack_delay: 1,
@@ -177,6 +181,7 @@ TYPES.push({
 	abilities: [
 		{name: 'Virus',	passive: false,		broadcast: 2}, 
 		{name: 'Soldiers',	passive: false,		broadcast: 1}, 
+		{name: 'Mass virus',	passive: false,		broadcast: 1}, 
 		],
 	size: ['M', 50],
 	icon_top: ['top1.png'],
@@ -193,9 +198,9 @@ TYPES.push({
 	type: 'tank',
 	description: ["Uses many soldiers for attack", "Very low damage"],
 	life: [150, 10],
-	damage: [7, 0.3],	//7 dps
+	damage: [10, 0.5],	//10 dps
 	range: 80,
-	scout: 90,
+	scout: 100,
 	armor: [10, 0, 10],
 	speed: 30,
 	attack_delay: 1,
@@ -213,15 +218,15 @@ TYPES.push({
 	accuracy: 90,
 	});
 
-//Helicopter
+//Apache
 TYPES.push({
-	name: 'Helicopter',
+	name: 'Apache',
 	type: 'tank',
 	description: ["Missiles", "Medium armor", "Strong against all"],
 	life: [150, 10],
 	damage: [20, 1],	//20 dps
 	range: 80,
-	scout: 100,
+	scout: 120,
 	armor: [40, 0.5, 50],	
 	speed: 30,
 	attack_delay: 1,
@@ -250,7 +255,7 @@ TYPES.push({
 	life: [150, 10],
 	damage: [15, 0.7],	//15 dps
 	range: 80,
-	scout: 110,
+	scout: 120,
 	armor: [10, 0, 10],
 	speed: 35,
 	attack_delay: 1,
