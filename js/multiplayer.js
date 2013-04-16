@@ -514,7 +514,7 @@ function get_packet(fromClient, message){
 		TANK_FROM.rand = DATA[3];
 		var ability_reuse = window[ability_function](TANK_FROM);
 		//reuse	
-		if(ability_reuse != undefined && ability_reuse != 0){	
+		if(ability_reuse != undefined && ability_reuse != 0){		
 			TANK_FROM.abilities_reuse[nr-1] = Date.now() + ability_reuse;
 			if(DATA[1] == name){
 				var tmp = new Array();

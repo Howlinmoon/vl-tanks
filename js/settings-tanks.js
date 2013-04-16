@@ -222,12 +222,12 @@ TYPES.push({
 TYPES.push({
 	name: 'Apache',
 	type: 'tank',
-	description: ["Missiles", "Medium armor", "Strong against all"],
+	description: ["Missiles", "Light armor", "Strong against all"],
 	life: [150, 10],
 	damage: [20, 1],	//20 dps
 	range: 80,
 	scout: 120,
-	armor: [40, 0.5, 50],	
+	armor: [30, 0.5, 40],	
 	speed: 30,
 	attack_delay: 1,
 	turn_speed: 6,
