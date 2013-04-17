@@ -326,7 +326,6 @@ function do_mortar(tank_id, distance_ok, skip_broadcast){
 		}								
 	//broadcast
 	if(game_mode == 2 && skip_broadcast !== true){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_mortar[3];
 		DATA = {
 			function: 'do_mortar',
 			fparam: [tank_id, true, true],
@@ -340,6 +339,12 @@ function do_mortar(tank_id, distance_ok, skip_broadcast){
 		delete TANK.try_mortar;
 		mouse_click_controll = false;
 		return false;
+		}
+		
+	//controll
+	if(game_mode == 2){
+		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+		TANK.abilities_reuse[0] = Date.now() + TANK.try_mortar[3];
 		}
 	
 	//bullet	
@@ -357,7 +362,6 @@ function do_mortar(tank_id, distance_ok, skip_broadcast){
 
 	//init reuse
 	if(game_mode == 1 || TANK.name == name){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_mortar[3];
 		var tmp = new Array();
 		tmp['function'] = "draw_ability_reuse";
 		tmp['duration'] = TANK.try_mortar[3];
@@ -678,7 +682,6 @@ function do_stun(tank_id, enemy_id, skip_broadcast){
 		
 	//broadcast
 	if(game_mode == 2 && skip_broadcast !== true){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_stun[2];
 		DATA = {
 			function: 'do_stun',
 			fparam: [tank_id, enemy_id, true],
@@ -693,6 +696,12 @@ function do_stun(tank_id, enemy_id, skip_broadcast){
 		mouse_click_controll = false;
 		return false;
 		}
+		
+	//controll
+	if(game_mode == 2){
+		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+		TANK.abilities_reuse[0] = Date.now() + TANK.try_stun[2];
+		}
 	
 	//bullet	
 	var tmp = new Array();
@@ -706,7 +715,6 @@ function do_stun(tank_id, enemy_id, skip_broadcast){
 	
 	//init reuse
 	if(game_mode == 1 || TANK.name == name){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_stun[2];
 		var tmp = new Array();
 		tmp['function'] = "draw_ability_reuse";
 		tmp['duration'] = TANK.try_stun[2];
@@ -892,7 +900,6 @@ function do_airstrike(tank_id, enemy_id, skip_broadcast){
 		
 	//broadcast
 	if(game_mode == 2 && skip_broadcast !== true){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_airstrike[2];
 		DATA = {
 			function: 'do_airstrike',
 			fparam: [tank_id, enemy_id, true],
@@ -906,6 +913,12 @@ function do_airstrike(tank_id, enemy_id, skip_broadcast){
 		delete TANK.try_airstrike;
 		mouse_click_controll = false;
 		return false;
+		}
+		
+	//controll
+	if(game_mode == 2){
+		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+		TANK.abilities_reuse[0] = Date.now() + TANK.try_airstrike[2];
 		}
 		
 	//bullet	
@@ -922,7 +935,6 @@ function do_airstrike(tank_id, enemy_id, skip_broadcast){
 	
 	//init reuse
 	if(game_mode == 1 || TANK.name == name){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_airstrike[2];
 		var tmp = new Array();
 		tmp['function'] = "draw_ability_reuse";
 		tmp['duration'] = TANK.try_airstrike[2];
@@ -1061,7 +1073,6 @@ function do_bomb(tank_id, distance_ok, skip_broadcast){
 		}
 	//broadcast
 	if(game_mode == 2 && skip_broadcast !== true){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_bomb[3];
 		DATA = {
 			function: 'do_bomb',
 			fparam: [tank_id, true, true],
@@ -1075,6 +1086,12 @@ function do_bomb(tank_id, distance_ok, skip_broadcast){
 		delete TANK.try_bomb;
 		mouse_click_controll = false;
 		return false;
+		}
+		
+	//controll
+	if(game_mode == 2){
+		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+		TANK.abilities_reuse[0] = Date.now() + TANK.try_bomb[3];
 		}
 	
 	//bullet	
@@ -1092,7 +1109,6 @@ function do_bomb(tank_id, distance_ok, skip_broadcast){
 	
 	//init reuse
 	if(game_mode == 1 || TANK.name == name){
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_bomb[3];
 		var tmp = new Array();
 		tmp['function'] = "draw_ability_reuse";
 		tmp['duration'] = TANK.try_bomb[3];

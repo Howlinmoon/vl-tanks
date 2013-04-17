@@ -931,18 +931,6 @@ function do_ability(nr, TANK){
 			else if(broadcast_mode==2){
 				//broadcast later
 				var ability_reuse = window[ability_function](TANK);
-				if(ability_reuse != undefined && ability_reuse != 0){
-					if(TANK.abilities_reuse[nr-1] > Date.now() ) return false; //last check
-					TANK.abilities_reuse[nr-1] = Date.now() + ability_reuse;
-					var tmp = new Array();
-					tmp['function'] = "draw_ability_reuse";
-					tmp['duration'] = ability_reuse;
-					tmp['type'] = 'REPEAT';
-					tmp['nr'] = nr-1;	
-					tmp['max'] = ability_reuse;
-					tmp['tank'] = TANK;
-					timed_functions.push(tmp);
-					}
 				}
 			}
 		}
