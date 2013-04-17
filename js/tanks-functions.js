@@ -342,10 +342,8 @@ function do_mortar(tank_id, distance_ok, skip_broadcast){
 		}
 		
 	//controll
-	if(game_mode == 2){
-		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_mortar[3];
-		}
+	if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+	TANK.abilities_reuse[0] = Date.now() + TANK.try_mortar[3];
 	
 	//bullet	
 	var tmp = new Array();
@@ -698,10 +696,8 @@ function do_stun(tank_id, enemy_id, skip_broadcast){
 		}
 		
 	//controll
-	if(game_mode == 2){
-		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_stun[2];
-		}
+	if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+	TANK.abilities_reuse[0] = Date.now() + TANK.try_stun[2];
 	
 	//bullet	
 	var tmp = new Array();
@@ -916,10 +912,8 @@ function do_airstrike(tank_id, enemy_id, skip_broadcast){
 		}
 		
 	//controll
-	if(game_mode == 2){
-		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_airstrike[2];
-		}
+	if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+	TANK.abilities_reuse[0] = Date.now() + TANK.try_airstrike[2];
 		
 	//bullet	
 	var tmp = new Array();
@@ -1089,10 +1083,8 @@ function do_bomb(tank_id, distance_ok, skip_broadcast){
 		}
 		
 	//controll
-	if(game_mode == 2){
-		if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
-		TANK.abilities_reuse[0] = Date.now() + TANK.try_bomb[3];
-		}
+	if(TANK.abilities_reuse[0] > Date.now() ) return false; //last check
+	TANK.abilities_reuse[0] = Date.now() + TANK.try_bomb[3];
 	
 	//bullet	
 	var tmp = new Array();
