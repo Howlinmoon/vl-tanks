@@ -9,26 +9,27 @@ var canvas_base = document.getElementById("canvas_main");
 var canvas_main = canvas_base.getContext("2d");						//moving objects layer
 
 //game settings
-var SOCKET = ['tryunion.com', '80'];	//socket server //unionplatform.com - amazing service
+var SOCKET = ['tryunion.com', '80'];//socket server //unionplatform.com - amazing service
 var FPS = 25;				//frames per second
 var settings_font = "bold 18px Helvetica";	//default font for settings buttons
-var START_GAME_COUNT_SINGLE=15;		//second how much to count in singleplayer
-var START_GAME_COUNT_MULTI=20;		//second how much to count in multiplayer
+var START_GAME_COUNT_SINGLE=15;	//second how much to count in singleplayer
+var START_GAME_COUNT_MULTI=20;	//second how much to count in multiplayer
 var WIDTH_APP = 800;			//application width
 var HEIGHT_APP = 525;			//application height
 var HEIGHT_STATUS_AREA = 171;		//status are height
-var SOCKET_ROOM_PREFIX = 'mv_';		//unique prefix for sockets library
+var SOCKET_ROOM_PREFIX = 'mv_';	//unique prefix for sockets library
 var MAX_SENT_PACKETS = 6000;		//max packets, that we can send to server per game
 var INFO_HEIGHT = 130;			//height of information block
 var STATUS_HEIGHT = 25;			//height of statusbar
 var MINI_MAP_PLACE = [13, 13, 104, 104, 3];	//x, y, width, height, border width
 var SKILL_BUTTON = 55;			//skill button width and height
-var DEBUG = false;			//show debug info
+var DEBUG = false;				//show debug info
 var SCORES_INFO = [10, 40, -20, 50, 100];	//level up, kill, death, per tower, win bonus
 var SOUND_EXP = '.ogg';			//default sound files extension
 var LEVEl_UP_TIME = 30;			//how much seconds must pass till level up
 var TOWER_HP_DAMAGE_IN_1VS1 = [0.5, 0.9];	//towers modifiers in multiplayer 1vs1
-var VERSION = "1.2.12";			//app version
+var SOLDIERS_INTERVAl = 25;		//pause between soldiers spawn, seconds
+var VERSION = "1.3";			//app version
 
 //other global variables
 var TANKS = new Array();		//tanks array
@@ -44,7 +45,7 @@ var PLAYERS = new Array();		//players list
 var opened_room_id = -1;		//active room id
 var WIDTH_MAP;				//map width, if big, offset start to work (works as scroll)
 var HEIGHT_MAP;				//map height, if big, offset start to work (works as scroll)
-var WIDTH_SCROLL;			//visible map part width, similar to WIDTH_APP
+var WIDTH_SCROLL;				//visible map part width, similar to WIDTH_APP
 var HEIGHT_SCROLL;			//visible map part height, = HEIGHT_APP - status bar height
 var APP_SIZE_CACHE = [WIDTH_APP, HEIGHT_APP]; //original app dimensions cache
 var MUTE_FX=false;			//if effects muted
@@ -58,13 +59,14 @@ var unique_id = 0;			//number for id generation
 var timed_functions = [];		//timed functions array, for repeative exec.
 var mouse_move_controll = false;	//if external funtion takes mouse control
 var mouse_click_controll = false;	//if external funtion takes mouse clicks controll
+var target_range = 0;			//targer circle range for aoe skills
 var lastLoop = new Date;		//tmp var for fps
 var mouse_pos = [0,0];			//current mouse position for external functions
 var mouse_click_pos = [0,0];		//last mouse click position for external functions
 var pre_draw_functions = [];		//extra functions executed before main draw loop
 var on_click_functions = [];		//on click custom actions functions, only if mouse_click_controll=true
 var game_mode = 0;			//1=single player, 2=multi player
-var QUALITY = 3;			//1=low, 2=mid, 3=high
+var QUALITY = 3;				//1=low, 2=mid, 3=high
 var PLACE = '';				//init, settings, select, game, score, rooms, room, create_room
 var preloaded=false;			//if all images preloaded
 var preload_total=0;			//total images for preload
@@ -76,7 +78,7 @@ var status_y=0;				//info bar y coordinates
 var chat_mode=0;				//if 1, show textbox for writing
 var CHAT_LINES=new Array();		//chat array lines
 var MY_TANK;				//my tank
-var TO_RADIANS = Math.PI/180; 		//for rotating
+var TO_RADIANS = Math.PI/180; 	//for rotating
 var MAP_SCROLL_CONTROLL = false;	//active if user scrolling map with mouse on mini map
 var MAP_SCROLL_MODE = 1;		//if 1, auto scroll, if 2, no auto scroll
 var room_id_to_join=-1;			//id of room, requested to join
@@ -86,6 +88,7 @@ var packets_used = 0;			//sent packets count in 1 game, there is limit...
 var packets_all = 0;			//received packets count in 1 game
 var shift_pressed = false;		//if shift is pressed
 var chat_shifted = false;		//if chat was activated with shift
+var autobots_added = 0;			//how much bots was added, used to generate id
 
 //repeative functions handlers
 var draw_interval_id;			//controller for main draw loop
@@ -94,6 +97,7 @@ var level_hp_regen_id;			//controller for hp regen handling function
 var timed_functions_id;			//controller for timed functions
 var start_game_timer_id;		//controller for timer in select window
 var chat_interval_id;			//controller for chat
+var bots_interval_id;			//controller for adding new bots function
 
 //on exit
 window.onbeforeunload = disconnect_game;

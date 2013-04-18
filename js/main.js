@@ -8,6 +8,8 @@ Email: www.viliusl@gmail.com
 function init_game(first_time){
 	PLACE = 'init';
 	dynamic_title();
+	CHAT_LINES = [];
+	
 	if(socket_live == true)
 		room_controller();
 	if(getCookie("mute_fx") != '0')
@@ -260,6 +262,7 @@ function init_action(map_nr, my_team){
 	PLACE = 'game';
 	dynamic_title();
 	room_controller();
+	CHAT_LINES = [];
 	
 	level = map_nr;
 	
@@ -354,7 +357,8 @@ function init_action(map_nr, my_team){
 		});
 		
 	draw_map(false);
-		
+	
+	bots_interval_id = setInterval(add_bots, 1000*SOLDIERS_INTERVAl);
 	level_hp_regen_id = setInterval(level_hp_regen_handler, 1000);
 	level_interval_id = setInterval(tank_level_handler, 1000);
 	timed_functions_id = setInterval(timed_functions_handler, 100);
@@ -370,7 +374,7 @@ function speed2pixels(speed, time_diff){
 	}
 //repeat some functions in time
 function timed_functions_handler(){
-	for (i in timed_functions){			
+	for(var i=0; i<timed_functions.length; i++){		
 		timed_functions[i].duration = timed_functions[i].duration - 100;
 		var duration = 	timed_functions[i].duration				
 		if(timed_functions[i].type == 'REPEAT')
@@ -379,7 +383,7 @@ function timed_functions_handler(){
 			if(timed_functions[i].type == 'ON_END')
 				window[timed_functions[i].function](timed_functions[i]);
 			//unregister f-tion
-			timed_functions.splice(i, 1);	i++;
+			timed_functions.splice(i, 1);	i--;
 			}
 		}
 	}
@@ -390,6 +394,7 @@ function quit_game(init_next_game){
 			return false;
 		}
 	
+	clearInterval(bots_interval_id);
 	clearInterval(draw_interval_id);
 	clearInterval(level_interval_id);
 	clearInterval(level_hp_regen_id);
@@ -409,7 +414,6 @@ function quit_game(init_next_game){
 		pre_draw_functions = [];
 		on_click_functions = [];
 		
-		canvas_main.clearRect(0, 0, WIDTH_APP, HEIGHT_APP);
 		canvas_main.clearRect(0, 0, WIDTH_APP, HEIGHT_APP);
 				
 		if(audio_main != undefined)
@@ -436,6 +440,7 @@ function quit_game(init_next_game){
 		parent.document.getElementById("fps").innerHTML = "";	
 
 		}catch(error){}
+	canvas_main.clearRect(0, 0, WIDTH_APP, HEIGHT_APP);
 	
 	//reset other variables
 	ROOMS = [];
@@ -450,6 +455,7 @@ function quit_game(init_next_game){
 	on_click_functions = [];
 	mouse_move_controll = false;
 	mouse_click_controll = false;
+	target_range = 0;
 	ABILITIES_POS = [];
 	game_mode = 1;
 	last_selected = -1;
@@ -579,7 +585,7 @@ function controll_chat(){
 	var time = new Date();
 	time = time.getTime();
 	var max_time = 20000;	//20s
-	for(var i in CHAT_LINES){
+	for(var i=0; i < CHAT_LINES.length; i++){
 		if(time - CHAT_LINES[i].time > max_time){
 			CHAT_LINES.splice(i, 1); i--;
 			}

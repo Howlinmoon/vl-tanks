@@ -65,7 +65,7 @@ function redraw_tank_stats(){
 	canvas_backround.fillStyle = "#182605";
 	canvas_backround.fillRect(status_x+195, status_y+15, 23, 15);
 	//draw
-	canvas_backround.fillStyle = "#939b84";
+	canvas_backround.fillStyle = "#c10000";
 	canvas_backround.font = "normal 18px Verdana";
 	var text = Math.floor(MY_TANK.level);
 	canvas_backround.fillText(text, status_x+195, status_y+28);
@@ -78,15 +78,13 @@ function redraw_tank_stats(){
 	canvas_backround.fillStyle = "#a3ad16";
 	canvas_backround.font = "bold 10px Verdana";
 	var damage_string = MY_TANK.damage;
-	if(MY_TANK.debuffs != undefined){
-		damage_first = damage_string;
-		for(var dd in MY_TANK.debuffs){
-			if(MY_TANK.debuffs[dd][0]=='weak'){
-				var diff = damage_first * MY_TANK.debuffs[dd][1] / 100;
-				damage_string = damage_string - diff;
-				if(damage_string < 0)
-					damage_string = 0;
-				}
+	for(var dd in MY_TANK.buffs){
+		if(MY_TANK.buffs[dd].name == 'weak'){
+			damage_string = damage_string * MY_TANK.buffs[dd].power;
+			if(damage_first < 0) damage_first = 0;
+			}
+		if(MY_TANK.buffs[dd].name == 'damage'){
+			damage_string = damage_string * MY_TANK.buffs[dd].power;
 			}
 		}
 	damage_string = Math.floor(damage_string);
@@ -211,8 +209,8 @@ function redraw_tank_stats(){
 	update_fps();
 	}
 function get_ability_test_length(text){
-	var thin_letter_width = 4;	//tfjilr
-	var average_letter_width = 7;
+	var thin_letter_width = 4;	//tfjilrt
+	var average_letter_width = 6;
 	var fat_letter_width = 11;	//mw
 	
 	var length = 2;	//2 for first cap letter
@@ -224,6 +222,7 @@ function get_ability_test_length(text){
 		else if(text[i] == 'i')	length += thin_letter_width;
 		else if(text[i] == 'l')	length += thin_letter_width;
 		else if(text[i] == 'r')	length += thin_letter_width;
+		else if(text[i] == 't')	length += thin_letter_width;
 		//fat
 		else if(text[i] == 'm')	length += fat_letter_width;
 		else if(text[i] == 'w')	length += fat_letter_width;
@@ -255,7 +254,7 @@ function draw_tank_abilities(){
 		ability_text = TYPES[MY_TANK.type].abilities[i].name;
 		canvas_backround.fillStyle = "#1d2411";
 		canvas_backround.font = "bold 10px Verdana";
-		if(ability_text.length>9)
+		if(ability_text.length>6)
 			canvas_backround.font = "bold 9px Verdana";
 		letter_padding = Math.floor((SKILL_BUTTON-get_ability_test_length(ability_text))/2);
 		if(letter_padding<0) letter_padding = 0;
@@ -286,7 +285,6 @@ function draw_ability_reuse(object){
 	if(object != undefined){
 		var i = object.nr;
 		var ability_reuse = object.tank.abilities_reuse[i] - Date.now();
-		
 		//button
 		var img = new Image();
 		if(TYPES[MY_TANK.type].abilities[i].passive == false)	
@@ -302,6 +300,8 @@ function draw_ability_reuse(object){
 		if(TYPES[MY_TANK.type].abilities[i].passive == false){
 			var img = new Image();
 			img_height = (SKILL_BUTTON) * ability_reuse / object.max + 5;
+			if(img_height > 65)
+				img_height = 65;	//error here
 			var img = new Image();
 			img.src = '../img/skill-on.png';
 			if(img_height < 6){
@@ -327,8 +327,8 @@ function draw_ability_reuse(object){
 		//text
 		canvas_backround.font = "bold 10px Verdana";
 		var ability_text = TYPES[MY_TANK.type].abilities[i].name;
-		if(ability_text.length>9)
-			canvas_backround.font = "bold 8px Verdana";
+		if(ability_text.length>6)
+			canvas_backround.font = "bold 9px Verdana";
 		letter_padding = Math.floor((SKILL_BUTTON-get_ability_test_length(ability_text))/2);
 		if(letter_padding<0) letter_padding = 0;
 		canvas_backround.fillText(ability_text, status_x_tmp+i*(SKILL_BUTTON+gap)+letter_padding, status_y+SKILL_BUTTON/2+3);

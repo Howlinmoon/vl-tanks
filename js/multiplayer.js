@@ -236,7 +236,7 @@ function get_packet(fromClient, message){
 			draw_rooms_list();
 		}
 	else if(type == 'delete_room'){	//room was deleted
-		for(var i in ROOMS){
+		for(var i=0; i < ROOMS.length; i++){	
 			if(ROOMS[i].id == DATA){
 				ROOMS.splice(i, 1); i--;
 				if(PLACE=='rooms')
@@ -269,7 +269,7 @@ function get_packet(fromClient, message){
 		//DATA = [room_id, player_name]
 		var ROOM = get_room_by_id(DATA[0]);
 		if(ROOM != false){
-			for(var j in ROOM.players){
+			for(var j=0; j < ROOM.players.length; j++){
 				if(ROOM.players[j].name == DATA[1]){
 					ROOM.players.splice(j, 1); j--;
 					if(PLACE=='room')
@@ -289,7 +289,7 @@ function get_packet(fromClient, message){
 			return false; // host was kicked, this is probably hack from outside
 			}
 		if(ROOM != false){
-			for(var j in ROOM.players){
+			for(var j=0; j < ROOM.players.length; j++){
 				if(ROOM.players[j].name == DATA[1]){
 					ROOM.players.splice(j, 1);  j--;
 					if(DATA[1]==name){
@@ -374,6 +374,14 @@ function get_packet(fromClient, message){
 			if(ROOM.host==name && ROOM.settings[0] != 'normal'){
 				choose_and_register_tanks(ROOM);
 				}
+			}
+		else if(PLACE=="rooms"){
+			for(var i=0; i < ROOMS.length; i++){	
+				if(ROOMS[i].id == DATA[0]){
+					ROOMS.splice(i, 1); i--;
+					}
+				}
+			draw_rooms_list();
 			}
 		}
 	else if(type == 'change_tank'){		//change map in selecting screen
@@ -461,9 +469,14 @@ function get_packet(fromClient, message){
 		}
 	else if(type == 'end_game'){		//game ends
 		//DATA = [game_id, lost_team]
-		if(PLACE=="game" && opened_room_id==DATA[0]){
-			draw_final_score(false, DATA[1]);
+		//if me host, broadcast game end
+		ROOM = get_room_by_id(opened_room_id);
+		if(ROOM.host == name){	log('deleting...' );
+			send_packet('delete_room', ROOM.id, true);
 			}
+		//draw scores
+		if(PLACE=="game" && opened_room_id==DATA[0])
+			draw_final_score(false, DATA[1]);
 		}
 	else if(type == 'leave_game'){		//player leaving game
 		//DATA = [room_id, player_name]
@@ -530,16 +543,17 @@ function get_packet(fromClient, message){
 		}
 	else if(type == 'chat'){		//chat
 		//DATA = room_id, data, player, team, place, shift
-		if(DATA[5] != 1){
+		if(DATA[5] != 1){				
 			if(PLACE != DATA[4]) return false;
 			if(PLACE=='game' && DATA[0] != opened_room_id) return false;
 			if(PLACE=='room' && DATA[0] != opened_room_id) return false;
 			if(PLACE=='select' && DATA[0] != opened_room_id) return false;
 			if(PLACE=='score' && DATA[0] != opened_room_id) return false;
 			}
-		else{
-			if(DATA[0]=='game' && PLACE != 'game') return false;
-			if(DATA[0]=='score' && PLACE != 'score') return false;
+		else{		
+			if((PLACE == 'game' || PLACE == 'score') && (DATA[4] != 'game' && DATA[4] != 'score') ) return false;
+			if(DATA[4]=='game' && PLACE != 'game') return false;
+			if(DATA[4]=='score' && PLACE != 'score') return false;
 			}
 		chat(DATA[1], DATA[2], DATA[3], DATA[5]);
 		update_players_ping(DATA[2]);
@@ -573,7 +587,10 @@ function get_packet(fromClient, message){
 		//adding extra info to tank
 		for(var i in DATA[1]){
 			var key = DATA[1][i].key;
-			TANK[key] = DATA[1][i].value
+			if(key == 'buffs')
+				TANK.buffs.push(DATA[1][i].value);
+			else
+				TANK[key] = DATA[1][i].value;
 			}
 		}
 	else if(type == 'tank_kill'){	//tank was killed
@@ -604,7 +621,7 @@ function get_packet(fromClient, message){
 			}
 		if(TYPES[TANK_TO.type].no_repawn != undefined){	
 			//removing
-			for(var b in TANKS){
+			for(var b=0; b < TANKS.length; b++){
 				if(TANKS[b].id==TANK_TO.id){	
 					TANKS.splice(b, 1);  b--;
 					break;
@@ -643,6 +660,7 @@ function get_packet(fromClient, message){
 			return false;
 			}
 		delete TANK.invisibility;
+		TANK.speed = TYPES[TANK.type].speed;
 		}	
 	else if(type == 'bullet'){	//tank hit
 		//DATA = [target_id, source_id, angle]
@@ -705,7 +723,7 @@ function register_tank_action(action, room_id, player, data, data2, data3){	//lo
 	else if(action=='level_up')
 		send_packet('level_up', [room_id, player, data]);
 	else if(action=='leave_room'){
-		for(var i in ROOMS){
+		for(var i=0; i < ROOMS.length; i++){
 			if(ROOMS[i].id == room_id){
 				if(ROOM.host == player){
 					//host leaving room

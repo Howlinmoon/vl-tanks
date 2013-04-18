@@ -126,12 +126,13 @@ function try_skills(TANK_AI){
 //ai move rgistration and graphics
 function soldiers_move(mouseX, mouseY){
 	if(MY_TANK.death_respan != undefined || MY_TANK.dead == 1) return false;
+	var gap_rand = 10;
+	mouseX_copy = mouseX;
+	mouseY_copy = mouseY;
 	
 	for(var i in TANKS){
-		if(TYPES[TANKS[i].type].type != 'human')	continue	//wrong type
-		if(TANKS[i].use_AI == false)	continue;	//not ai
-		if(TANKS[i].team != MY_TANK.team)	continue;	//wrong team
-		if(game_mode == 2 && TANKS[i].master.id != MY_TANK.id) continue;	//not under my controll
+		if(TANKS[i].master == undefined) continue;	//not under controll
+		if(TANKS[i].master != undefined && TANKS[i].master.id != MY_TANK.id) continue;	//not under MY controll
 		
 		if(MY_TANK.invisibility != undefined){
 			if(game_mode == 2)
@@ -139,6 +140,10 @@ function soldiers_move(mouseX, mouseY){
 			else
 				delete MY_TANK.invisibility;
 			}
+		
+		//randomize
+		mouseX = mouseX_copy + getRandomInt(-gap_rand, gap_rand);
+		mouseY = mouseY_copy + getRandomInt(-gap_rand, gap_rand);
 			
 		//check clicks
 		var found_something = false;
