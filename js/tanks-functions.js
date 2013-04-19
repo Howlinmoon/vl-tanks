@@ -631,7 +631,7 @@ function Virus(TANK, descrition_only, settings_only, ai){
 	return 0;
 	}
 function Mass_virus(TANK, descrition_only, settings_only, ai){
-	var reuse = 40000;	reuse = 1000;
+	var reuse = 40000;
 	var power = 30 + 3 * (TANK.level-1);	
 	var duration = 2000;
 	var range = 40;
