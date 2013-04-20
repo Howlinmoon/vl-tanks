@@ -554,6 +554,7 @@ function get_packet(fromClient, message){
 			if((PLACE == 'game' || PLACE == 'score') && (DATA[4] != 'game' && DATA[4] != 'score') ) return false;
 			if(DATA[4]=='game' && PLACE != 'game') return false;
 			if(DATA[4]=='score' && PLACE != 'score') return false;
+			if((PLACE == 'game' || PLACE == 'score') && DATA[3] != MY_TANK.team) return false;
 			}
 		chat(DATA[1], DATA[2], DATA[3], DATA[5]);
 		update_players_ping(DATA[2]);
@@ -637,6 +638,9 @@ function get_packet(fromClient, message){
 			TANK_FROM.score = TANK_FROM.score + SCORES_INFO[1];
 			death(TANK_TO);
 			}
+		//show kill message
+		if(TANK_FROM.name != '')
+			chat(TANK_TO.name+" was killed by "+TANK_FROM.name+"!", false, false);
 		}
 	else if(type == 'level_up'){	//tank leveled up
 		//DATA = room_id, player_id, level
@@ -675,6 +679,7 @@ function get_packet(fromClient, message){
 			return false;
 			}
 		update_players_ping(TANK.name);
+		
 		//create bullet
 		var tmp = new Array();
 		tmp.x = TANK.x + TYPES[TANK.type].size[1]/2;
@@ -684,6 +689,7 @@ function get_packet(fromClient, message){
 		tmp.angle = DATA[2];
 		tmp.skill = 1;
 		BULLETS.push(tmp);
+		if(TYPES[TANK_TO.type].type != 'human') TANK.bullets++;
 		
 		//extra updates
 		TANK.fire_angle = DATA[2];
@@ -738,8 +744,11 @@ function register_tank_action(action, room_id, player, data, data2, data3){	//lo
 			}
 		}
 	else if(action=='chat'){
-		if(data.length > 100)
-			data = data.substring(0, 100);
+		var text_limit = 100;
+		if(PLACE == 'room')
+			text_limit = 500;
+		if(data.length > text_limit)
+			data = data.substring(0, text_limit);
 		var team = '';
 		if(PLACE=='game')
 			team = MY_TANK.team;

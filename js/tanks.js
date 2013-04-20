@@ -210,7 +210,7 @@ function add_player_name(tank){
 		//read from cache
 		canvas_main.drawImage(tank.cache_name.object, xx, yy-25);	
 		}
-	else{
+	else{	
 		//create tmp
 		var tmp_canvas = document.createElement('canvas');
 		tmp_canvas.width = 100
@@ -219,13 +219,10 @@ function add_player_name(tank){
 	
 		//add data
 		if(tank.team=='B')		tmp_object.fillStyle = "#0000ff";
-		else if(tank.team=='R')		tmp_object.fillStyle = "#b12525";
+		else if(tank.team=='R')		tmp_object.fillStyle = "#ffff00";	//#b12525 ugly
 		else if(tank.team=='G')		tmp_object.fillStyle = "#196119";
 		else if(tank.team=='Y')		tmp_object.fillStyle = "#ffff00";
-		else 				tmp_object.fillStyle = "#ffffff";
-		
-		if(tank.id == MY_TANK.id)
-			tmp_object.fillStyle = "#ffff00";
+		else 					tmp_object.fillStyle = "#ffffff";
 		
 		tmp_object.font = "normal 9px Verdana";
 		tmp_object.fillText(player_name, 0+name_padding, 12);
@@ -378,15 +375,13 @@ function check_collisions(xx, yy, TANK){
 //checks tanks levels
 function tank_level_handler(){	//once per second
 	for (i in TANKS){
-		if(TYPES[TANKS[i].type].type == 'tower') 	return false;
-		if(TYPES[TANKS[i].type].type == 'human') 	return false;
+		if(TYPES[TANKS[i].type].type == 'tower') continue;
+		if(TYPES[TANKS[i].type].type == 'human') continue;
 		if(game_mode == 2 && TANKS[i].id != MY_TANK.id)	continue;	//not our business
 		if(TANKS[i].dead == 1) {
 			TANKS[i].death_time++;
-			return false; //dead
+			continue; //dead
 			}
-		if(TANKS[i].hit_reuse - Date.now() > 0)
-			TANKS[i].bullets++;	//shooting
 		last_level = TANKS[i].level;
 		
 		//calc level
@@ -420,7 +415,7 @@ function tank_level_handler(){	//once per second
 					try{
 						window[ability_function](TANKS[i]);
 						}
-					catch(err){}
+					catch(err){console.log("Error: "+err.message);}
 					}
 				}
 			}
@@ -505,6 +500,7 @@ function check_enemies(TANK){
 				tmp['bullet_from_target'] = TANK;
 				tmp['angle'] = round(f_angle);
 				BULLETS.push(tmp);
+				if(TYPES[TANKS[i].type].type != 'human') TANK.bullets++;
 				}
 			else
 				send_packet('bullet', [TANKS[i].id, TANK.id, round(f_angle)]);
@@ -566,6 +562,7 @@ function check_enemies(TANK){
 			tmp['bullet_from_target'] = TANK;
 			tmp['angle'] = round(f_angle);
 			BULLETS.push(tmp);
+			if(TYPES[TANKS[i].type].type != 'human') TANK.bullets++;
 			}
 		else
 			send_packet('bullet', [TANKS[i].id, TANK.id, round(f_angle)]);
@@ -745,6 +742,10 @@ function do_damage(TANK, TANK_TO, BULLET){
 		armor = 0;	//pierce armor
 	damage = round( damage*(100-armor)/100 );		//log(damage+", target armor="+armor+", type="+TYPES[TANK_TO.type].name);
 	
+	//mines do less damage on ally towers
+	if(BULLET.damage_all_teams != undefined && TYPES[TANK_TO.type].type=="tower" && BULLET.bullet_from_target.team == TANK_TO.team)
+		damage = damage/2;
+	
 	//check invisibility
 	if(TANK_TO.invisibility != undefined){
 		if(BULLET.aoe_effect != undefined){
@@ -841,10 +842,6 @@ function do_damage(TANK, TANK_TO, BULLET){
 					//add score
 					TANK.score = TANK.score + SCORES_INFO[1];
 					}
-				if(game_mode==2){
-					if(killer.name != '' && check_if_broadcast(TANK)==true)
-						register_tank_action('chat', opened_room_id, false, "Player "+TANK_TO.name+" was killed by "+killer.name+"!");
-					}	
 				}
 			if(game_mode == 2 && TYPES[TANK_TO.type].type != 'human'){
 				if(check_if_broadcast(TANK)==true)
@@ -1303,6 +1300,7 @@ function add_bots(){
 	var gap = 15;	//gap beween units in group
 
 	//prepare
+	if(DEBUG == true && game_mode == 2) return false;	//no need here
 	var type = 0;
 	for(var t in TYPES){
 		if(TYPES[t].name == type_name)

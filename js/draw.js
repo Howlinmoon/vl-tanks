@@ -17,12 +17,12 @@ function draw_main(){
 		canvas_map_sight.fillRect(0, 0, WIDTH_MAP, HEIGHT_MAP);
 		}
 	
+	redraw_mini_map();	// mini map actions
+	
 	//external drawings functions
 	for (i in pre_draw_functions){
 		window[pre_draw_functions[i][0]](pre_draw_functions[i][1]);
 		}
-	
-	redraw_mini_map();	// mini map actions
 
 	//tanks actions
 	for(var i=0; i < TANKS.length; i++){
@@ -89,22 +89,6 @@ function draw_main(){
 			if(TANKS[i].stun - Date.now() < 0)
 				delete TANKS[i].stun;
 				
-			if(mouse_click_controll==true && TANKS[i].name == name){
-				//target
-				img = new Image();
-				img.src = '../img/target.png';
-				canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
-				
-				if(target_range != 0){
-					//circle
-					canvas_main.beginPath();
-					canvas_main.arc(mouse_pos[0], mouse_pos[1], target_range, 0 ,2*Math.PI, false);	
-					canvas_main.lineWidth = 1;
-					canvas_main.strokeStyle = "#c10000";
-					canvas_main.stroke();
-					}
-				}
-			
 			//move lock
 			if(TANKS[i].target_move_lock != undefined){
 				var i_locked = false;
@@ -232,6 +216,24 @@ function draw_main(){
 			console.log("Error: "+err.message);
 			}
 		}
+	
+	//target	
+	if(mouse_click_controll==true){
+		//target
+		img = new Image();
+		img.src = '../img/target.png';
+		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
+		
+		if(target_range != 0){
+			//circle
+			canvas_main.beginPath();
+			canvas_main.arc(mouse_pos[0], mouse_pos[1], target_range, 0 ,2*Math.PI, false);	
+			canvas_main.lineWidth = 1;
+			canvas_main.strokeStyle = "#c10000";
+			canvas_main.stroke();
+			}
+		}
+		
 	lighten_pixels_all();
 	if(MY_TANK.dead == 1)	
 		draw_message(canvas_main, "You will respawn in  "+Math.ceil((MY_TANK.respan_time-Date.now())/1000)+" seconds.");
@@ -254,7 +256,7 @@ function draw_main(){
 var settings_positions = [];
 var last_active_tab = -1;
 var logo_visible = 1;
-//draws main buttons on logo screen
+//draws logo and main buttons on logo screen
 function add_settings_buttons(canvas_this, text_array, active_i){
 	var button_width = 300;
 	var button_height = 35;
@@ -272,7 +274,7 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 	last_active_tab = active_i;
 	settings_positions = [];
 	
-	//logo backround color
+	//logo background color
 	canvas_backround.fillStyle = "#676767";
 	canvas_backround.fillRect(0, 0, WIDTH_APP, HEIGHT_APP-27);
 		
@@ -317,6 +319,17 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 	img.src = '../img/logo.png';
 	var left = (WIDTH_APP-598)/2;	
 	canvas_backround.drawImage(img, left, 15);
+	
+	//intro text
+	canvas_backround.font = "Normal 18px Arial";
+	canvas_backround.fillStyle = '#ffffff';
+	canvas_backround.fillText("Intro", WIDTH_APP-50, 20);
+	//link
+	register_button(WIDTH_APP-60, 0, 60, 25, PLACE, function(){ 
+		intro_page=0;
+		PLACE = 'intro';
+		intro(true);
+		});
 	
 	for (i in text_array){
 		//background
@@ -366,7 +379,7 @@ function draw_logo_tanks(left, top, change_logo){
 			canvas_backround.font = "Bold 70px Arial";
 			canvas_backround.strokeStyle = '#ffffff';
 			canvas_backround.strokeText(text, left, top+52);
-			return false;
+ 	  		return false;
 			}
 		else{
 			logo_visible=0;
@@ -607,6 +620,7 @@ function draw_tank_select_screen(selected_tank){
 	dynamic_title();
 	canvas_map.clearRect(0, 0, WIDTH_MAP, HEIGHT_MAP); 
 	canvas_map_sight.clearRect(0, 0, WIDTH_MAP, HEIGHT_MAP);
+	document.getElementById("chat_box").style.display = 'none';
 	room_controller();
 	
 	var y = 10;
@@ -842,7 +856,8 @@ function update_preload(images_loaded){
 	
 	if(preload_left==0 || preload_left < 3){
 		preloaded=true;
-		add_first_screen_elements();
+		//add_first_screen_elements();
+		intro();
 		return false;
 		}
 	
@@ -860,8 +875,9 @@ function update_preload(images_loaded){
 	}
 //shows chat lines
 function show_chat(){
+	if(PLACE == 'room') return false;
 	var gap = 20;
-	var bottom = HEIGHT_APP - 190;
+	var bottom = HEIGHT_APP - INFO_HEIGHT - STATUS_HEIGHT - 10;
 
 	canvas = canvas_main;
 	
@@ -872,33 +888,46 @@ function show_chat(){
 			text = CHAT_LINES[i].text;
 		else
 			text = CHAT_LINES[i].author+": "+CHAT_LINES[i].text;
-		if(text.length > 100)
-			text = text.substring(0, 100);
-		
+		var text_limit = 100;
+		if(text.length > text_limit)
+			text = text.substring(0, text_limit);
+		if(CHAT_LINES[i].shift==1 && PLACE == 'game' && CHAT_LINES[i].team == MY_TANK.team && CHAT_LINES[i].author !== false)
+			text = "[Team] "+text;
+			
 		//background
 		canvas.font = "normal 13px Helvetica";
 		canvas.fillStyle = "#dbd9da";
 		roundRect(canvas, 5, bottom-i*gap-13, text.length*7+10, 17, 3, true);
 		
 		//text color
-		if(CHAT_LINES[i].author===false)
-			canvas.fillStyle = "#6f155f";	//system chat
-		else if(CHAT_LINES[i].team == 'R')
-			canvas.fillStyle = "#ff0000";	//team red
-		else if(CHAT_LINES[i].team == 'B')
-			canvas.fillStyle = "#0000ff";	//team blue
-		else
-			canvas.fillStyle = "#444444";	//default color
+		if(CHAT_LINES[i].author===false)		canvas.fillStyle = "#444444";	//system chat
+		else if(CHAT_LINES[i].team == 'R')		canvas.fillStyle = "#ff0000";	//team red
+		else if(CHAT_LINES[i].team == 'B')		canvas.fillStyle = "#0000ff";	//team blue
+		else							canvas.fillStyle = "#444444";	//default color
 		
 		//shift
 		if(CHAT_LINES[i].shift==1 && PLACE != 'game'){
 			canvas.font = "bold 13px Helvetica";
-			canvas.fillStyle = "#ff0000";	//default color
+			canvas.fillStyle = "#ff0000";
 			}
 		
 		//show it
 		canvas.fillText(text, 10, bottom-i*gap);
 		}
+	}
+//show chat in room - this is textbox with scroll ability
+function update_scrolling_chat(CHAT){
+	var chat_container = document.getElementById("chat_box");
+
+	var new_content = document.createElement("div");
+	if(CHAT.shift==1)
+		new_content.innerHTML = "<span style=\"font-weight:bold;color:#0000ff;\">"+CHAT.author+"</span>: "+CHAT.text;
+	else
+		new_content.innerHTML = "<b>"+CHAT.author+"</b>: "+CHAT.text;
+	chat_container.appendChild(new_content);
+	
+	//scroll
+	chat_container.scrollTop = chat_container.scrollHeight;
 	}
 //calculate body and turret rotation
 function body_rotation(obj, str, speed, rot, time_diff){
