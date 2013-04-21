@@ -471,7 +471,7 @@ function get_packet(fromClient, message){
 		//DATA = [game_id, lost_team]
 		//if me host, broadcast game end
 		ROOM = get_room_by_id(opened_room_id);
-		if(ROOM.host == name){	log('deleting...' );
+		if(ROOM.host == name){
 			send_packet('delete_room', ROOM.id, true);
 			}
 		//draw scores
@@ -482,8 +482,13 @@ function get_packet(fromClient, message){
 		//DATA = [room_id, player_name]
 		chat(DATA[1]+" left the game.", false, false);
 		ROOM = get_room_by_id(DATA[0]);
-		if(ROOM.host == DATA[1])	//host left game ... we are in trouble, unless we switch host to other person
-			ROOM.host = ROOM.host_enemy_name;
+		if(ROOM.host == DATA[1]){	//host left game ... we are in trouble, unless we switch host to other person
+			if(ROOM.host == ROOM.host_enemy_name){	//we lost second host - we are in trouble now
+				register_tank_action('end_game', opened_room_id, false, false);
+				return false;
+				}
+			ROOM.host = ROOM.host_enemy_name;	//fixed
+			}
 		for(var p in ROOM.players){
 			if(ROOM.players[p].name == DATA[1])
 				ROOM.players[p].ping = Date.now()-60*1000;
@@ -665,9 +670,13 @@ function get_packet(fromClient, message){
 			}
 		delete TANK.invisibility;
 		TANK.speed = TYPES[TANK.type].speed;
+		}
+	else if(type == 'summon_bots'){	//send bots
+		//DATA = [room_id, random_id]
+		add_bots(DATA[1]);
 		}	
 	else if(type == 'bullet'){	//tank hit
-		//DATA = [target_id, source_id, angle]
+		//DATA = [target_id, source_id, angle, damage, instant_bullet, pierce_armor]
 		TANK_TO = get_tank_by_id(DATA[0]);
 		TANK = get_tank_by_id(DATA[1]);
 		if(TANK_TO===false){	
@@ -688,6 +697,12 @@ function get_packet(fromClient, message){
 		tmp.bullet_from_target = TANK;
 		tmp.angle = DATA[2];
 		tmp.skill = 1;
+		if(DATA[3] != undefined && DATA[3] != false)
+			tmp.damage = DATA[3];
+		if(DATA[4] != undefined && DATA[4] != false)
+			tmp.instant_bullet = 1;
+		if(DATA[5] != undefined && DATA[5] != false)
+			tmp.pierce_armor = 1;
 		BULLETS.push(tmp);
 		if(TYPES[TANK_TO.type].type != 'human') TANK.bullets++;
 		

@@ -18,7 +18,7 @@ TYPES.push({
 	abilities: [					//name; skill icon; active or passive; broadcast activation in multiplayer? 0-no, 1-yes, 2-yes, but on later
 		{name: 'Rest',		passive: false,		broadcast: 1}, 
 		{name: 'Rage',		passive: false,		broadcast: 1}, 
-		{name: 'Shield',	passive: true,		broadcast: 0}, 
+		{name: 'Shield',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],				//[tank size: S/M/L, icon width and height(same)]
 	icon_top: ['top1.png'],				//tank base images
@@ -44,8 +44,8 @@ TYPES.push({
 	turn_speed: 3,
 	abilities: [
 		{name: 'Blitzkrieg',	passive: false,		broadcast: 1},
-		{name: 'Frenzy',	passive: false,		broadcast: 1}, 
-		{name: 'Damage',	passive: true,		broadcast: 0}, 
+		{name: 'Frenzy',		passive: false,		broadcast: 1}, 
+		{name: 'Damage',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
 	preview: 'preview.png',
@@ -97,8 +97,8 @@ TYPES.push({
 	attack_delay: 1,
 	turn_speed: 2,
 	abilities: [
-		{name: 'Missile',	passive: false,		broadcast: 2}, 
-		{name: 'Mortar',	passive: false,		broadcast: 2}, 
+		{name: 'Missile',		passive: false,		broadcast: 2}, 
+		{name: 'Mortar',		passive: false,		broadcast: 2}, 
 		{name: 'Range',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
@@ -124,7 +124,7 @@ TYPES.push({
 	attack_delay: 2,
 	turn_speed: 2,
 	abilities: [
-		{name: 'Strike',	passive: false,		broadcast: 2}, 
+		{name: 'Strike',		passive: false,		broadcast: 2}, 
 		{name: 'Camouflage',	passive: false,		broadcast: 1}, 
 		{name: 'Range',		passive: true,		broadcast: 0}, 
 		],
@@ -153,7 +153,7 @@ TYPES.push({
 	turn_speed: 4,
 	abilities: [
 		{name: 'Mine',		passive: false,		broadcast: 1}, 
-		{name: 'Explode',	passive: false,		broadcast: 1}, 
+		{name: 'Explode',		passive: false,		broadcast: 1}, 
 		{name: 'SAM',		passive: false,		broadcast: 1}, 
 		],
 	size: ['M', 50],
@@ -265,7 +265,7 @@ TYPES.push({
 	no_collisions: 1,
 	abilities: [
 		{name: 'Bomb',		passive: false,		broadcast: 2}, 
-		{name: 'AA bomb',	passive: false,		broadcast: 2}, 
+		{name: 'AA bomb',		passive: false,		broadcast: 2}, 
 		{name: 'Rest',		passive: false,		broadcast: 1}, 
 		],
 	size: ['M', 50],

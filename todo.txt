@@ -1,12 +1,5 @@
 SYNC
-	aoe bombs sync
 	wrong team respawn place
-	soldiers
-		dont summon if multi, only if host/ + broadcast
-			broadcast id
-		on minis reach end, kill it
-	if host dc .. check it again
-	invivisbility do not work
 IDEAS
 	new units
 		Drone: medium hp, medium armor, high dps, but extremely low range. Skills: blink, glue, steal essence.

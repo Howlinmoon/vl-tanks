@@ -264,7 +264,6 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 	var top_margin = 370;
 	var button_i=0;
 	var letter_height = 9;
-	var letter_width = 9;
 	
 	if(active_i==undefined)
 		active_i = -1;
@@ -342,8 +341,9 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 	
 		//text
 		canvas_backround.fillStyle = "#ffffff";
-		canvas_backround.font = settings_font;
-		canvas_backround.fillText(text_array[i], Math.round((WIDTH_APP-button_width)/2+(button_width-letter_width*text_array[i].length)/2), top_margin+(button_height+buttons_gap)*button_i+Math.round((button_height+letter_height)/2));
+		canvas_backround.font = settings_font;	
+		var letters_width = canvas_backround.measureText(text_array[i]).width;
+		canvas_backround.fillText(text_array[i], Math.round((WIDTH_APP-button_width)/2+(button_width-letters_width)/2), top_margin+(button_height+buttons_gap)*button_i+Math.round((button_height+letter_height)/2));
 		
 		//save position
 		var tmp = new Array();
@@ -412,7 +412,6 @@ function draw_final_score(live, lost_team){
 	var buttons_gap = 5;
 	var top_margin = 60;
 	var letter_height = 9;
-	var letter_width = 9;
 	var text_y = 70;
 	
 	//find canvas
@@ -437,10 +436,12 @@ function draw_final_score(live, lost_team){
 		}
 	if(live==false){					//final scores
 		//add some score to winning team
-		for (var i in TANKS){
-			if(TANKS[i].team == lost_team)
-				continue;
-			TANKS[i].score = TANKS[i].score + SCORES_INFO[4];
+		if(lost_team != false){									log('adding scores');
+			for (var i in TANKS){
+				if(TANKS[i].team == lost_team)
+					continue;
+				TANKS[i].score = TANKS[i].score + SCORES_INFO[4];
+				}
 			}
 	
 		PLACE = 'score';
@@ -484,9 +485,13 @@ function draw_final_score(live, lost_team){
 			canvas_backround.fillStyle = "#3c81ff";
 			var tex = "Team Blue won the game";
 			}
-		else{
+		else if(lost_team=='B'){
 			canvas_backround.fillStyle = "#9c0309";
 			var tex = "Team Red won the game";
+			}
+		else if(lost_team === false){
+			canvas_backround.fillStyle = "#9c0309";
+			var tex = "Tie - both commanders left the battle...";
 			}
 		canvas_backround.font = "bold 20px Helvetica";
 		canvas_backround.fillText(tex, 110, 45);
@@ -551,7 +556,12 @@ function draw_final_score(live, lost_team){
 			canvas.fillStyle = "#000000";
 			var name_tmp = TANKS[i].name;
 			if(name_tmp != undefined && name_tmp.length>33)
-				name_tmp = name_tmp.substr(0,33) 
+				name_tmp = name_tmp.substr(0,33)
+			if(game_mode==2){
+				ROOM = get_room_by_id(opened_room_id);
+				if(ROOM.host == TANKS[i].name)
+					name_tmp = name_tmp+"*";
+				}
 			canvas.fillText(name_tmp, Math.round((WIDTH_APP-button_width)/2)+40, text_y);
 			
 			//type
@@ -895,15 +905,15 @@ function show_chat(){
 			text = "[Team] "+text;
 			
 		//background
-		canvas.font = "normal 13px Helvetica";
+		/*canvas.font = "normal 13px Helvetica";
 		canvas.fillStyle = "#dbd9da";
-		roundRect(canvas, 5, bottom-i*gap-13, text.length*7+10, 17, 3, true);
+		roundRect(canvas, 5, bottom-i*gap-13, text.length*7+10, 17, 3, true);*/
 		
 		//text color
-		if(CHAT_LINES[i].author===false)		canvas.fillStyle = "#444444";	//system chat
-		else if(CHAT_LINES[i].team == 'R')		canvas.fillStyle = "#ff0000";	//team red
+		if(CHAT_LINES[i].author===false)		canvas.fillStyle = "#222222";	//system chat
+		else if(CHAT_LINES[i].team == 'R')		canvas.fillStyle = "#8f0c12";	//team red
 		else if(CHAT_LINES[i].team == 'B')		canvas.fillStyle = "#0000ff";	//team blue
-		else							canvas.fillStyle = "#444444";	//default color
+		else							canvas.fillStyle = "#222222";	//default color
 		
 		//shift
 		if(CHAT_LINES[i].shift==1 && PLACE != 'game'){
@@ -912,7 +922,13 @@ function show_chat(){
 			}
 		
 		//show it
-		canvas.fillText(text, 10, bottom-i*gap);
+		canvas.save();
+		canvas.shadowOffsetX = 0;
+		canvas.shadowOffsetY = 0;
+		canvas.shadowBlur = 4;
+		canvas.shadowColor = "#ffffff";
+		canvas.fillText(text, 10,bottom-i*gap);
+		canvas.restore();
 		}
 	}
 //show chat in room - this is textbox with scroll ability

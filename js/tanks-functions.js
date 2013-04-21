@@ -244,7 +244,6 @@ function Boost(TANK, descrition_only, settings_only, ai){
 	if(descrition_only != undefined)
 		return 'Inrease nearby allies damage by '+power+'.';
 	if(settings_only != undefined) return {reuse: reuse};
-	if(ai != undefined) return false;
 	
 	TANK.abilities_reuse[2] = Date.now() + reuse; 
 	var tank_size_from = TYPES[TANK.type].size[1]/2;
@@ -297,13 +296,16 @@ function Missile(TANK, descrition_only, settings_only, ai){
 	
 	if(TANK.try_missile != undefined){
 		delete TANK.try_missile;
-		mouse_click_controll = false;
-		target_range=0;
+		if(TANK.id == MY_TANK.id){
+			mouse_click_controll = false;
+			target_range=0;
+			}
 		return 0;
 		}
-		
-	mouse_click_controll = true;
-	target_range = 0;
+	if(TANK.id == MY_TANK.id){	
+		mouse_click_controll = true;
+		target_range = 0;
+		}
 	//init
 	TANK.try_missile = {
 		range: range,
@@ -330,13 +332,16 @@ function Mortar(TANK, descrition_only, settings_only, ai){
 		
 	if(TANK.try_bomb != undefined){
 		delete TANK.try_bomb;
- 		mouse_click_controll = false;
- 		target_range=0;
+		if(TANK.id == MY_TANK.id){
+	 		mouse_click_controll = false;
+	 		target_range=0;
+	 		}
 		return 0;
 		}
-	
-	mouse_click_controll = true;
-	target_range = splash_range;
+	if(TANK.id == MY_TANK.id){
+		mouse_click_controll = true;
+		target_range = splash_range;
+		}
 	//init
 	TANK.try_bomb = {
 		range: range,
@@ -369,14 +374,16 @@ function Strike(TANK, descrition_only, settings_only, ai){
 	
 	if(TANK.try_missile != undefined){
 		delete TANK.try_missile;
-		mouse_click_controll = false;
-		target_range=0;
+		if(TANK.id == MY_TANK.id){
+			mouse_click_controll = false;
+			target_range=0;
+			}
 		return 0;
 		}
-		
-	mouse_click_controll = true;
-	target_range = 0;
-	
+	if(TANK.id == MY_TANK.id){
+		mouse_click_controll = true;
+		target_range = 0;
+		}
 	//init
 	TANK.try_missile = {
 		range: range,
@@ -397,14 +404,23 @@ function Camouflage(TANK, descrition_only, settings_only, ai){
 	if(descrition_only != undefined)
 		return 'Become invisible for '+(duration/1000)+'s. Speed is reduced by '+round(100-power_speed*100)+'%';
 	if(settings_only != undefined) return {reuse: reuse};
-	if(ai != undefined){
+	if(ai != undefined)
 		TANK.move = 0;
-		}
 	
 	TANK.abilities_reuse[1] = Date.now() + reuse;
 	TANK.invisibility = 1;
 	TANK.speed = round(TANK.speed * power_speed);
 	delete TANK.target_shoot_lock;
+	
+	//remove all bullets from it, same for his own bullets
+	for (b = 0; b < BULLETS.length; b++){
+		if(BULLETS[b].bullet_to_target != undefined && BULLETS[b].bullet_to_target.id == TANK.id){
+			BULLETS.splice(b, 1); b--;
+			}
+		if(BULLETS[b].bullet_from_target.id == TANK.id){
+			BULLETS.splice(b, 1); b--;
+			}
+		}
 	
 	//register stop function	
 	var tmp = new Array();
@@ -614,13 +630,16 @@ function Virus(TANK, descrition_only, settings_only, ai){
 	
 	if(TANK.try_missile != undefined){
 		delete TANK.try_missile;
-		mouse_click_controll = false;
-		target_range=0;
+		if(TANK.id == MY_TANK.id){
+			mouse_click_controll = false;
+			target_range=0;
+			}
 		return 0;
 		}
-		
-	mouse_click_controll = true;
-	target_range = 0;
+	if(TANK.id == MY_TANK.id){
+		mouse_click_controll = true;
+		target_range = 0;
+		}
 	//init
 	TANK.try_missile = {
 		range: range,
@@ -731,8 +750,10 @@ function Fire_bomb(TANK, descrition_only, settings_only, ai){
 		
 	if(TANK.try_bomb != undefined){
 		delete TANK.try_bomb;
- 		mouse_click_controll = false;
- 		target_range=0;
+		if(TANK.id == MY_TANK.id){
+	 		mouse_click_controll = false;
+	 		target_range=0;
+	 		}
 		return 0;
 		}
 	
@@ -740,8 +761,10 @@ function Fire_bomb(TANK, descrition_only, settings_only, ai){
 	if(TYPES[TANK.type].name == 'Apache')
 		ability_nr = 1;	
 	
-	mouse_click_controll = true;
-	target_range = splash_range;
+	if(TANK.id == MY_TANK.id){
+		mouse_click_controll = true;
+		target_range = splash_range;
+		}
 	//init
 	TANK.try_bomb = {
 		range: range,
@@ -818,13 +841,16 @@ function Airstrike(TANK, descrition_only, settings_only, ai){
 	
 	if(TANK.try_missile != undefined){
 		delete TANK.try_missile;
-		mouse_click_controll = false;
-		target_range=0;
+		if(TANK.id == MY_TANK.id){
+			mouse_click_controll = false;
+			target_range=0;
+			}
 		return 0;
 		}
-	
-	mouse_click_controll = true;
-	target_range = 0;
+	if(TANK.id == MY_TANK.id){
+		mouse_click_controll = true;
+		target_range = 0;
+		}
 	//init
 	TANK.try_missile = {
 		range: range,
@@ -882,13 +908,16 @@ function Bomb(TANK, descrition_only, settings_only, ai){
 	
 	if(TANK.try_bomb != undefined){
 		delete TANK.try_bomb;
-		mouse_click_controll = false;
-		target_range=0;
+		if(TANK.id == MY_TANK.id){
+			mouse_click_controll = false;
+			target_range=0;
+			}
 		return 0;
 		}
-	
-	mouse_click_controll = true;
-	target_range = splash_range;
+	if(TANK.id == MY_TANK.id){
+		mouse_click_controll = true;
+		target_range = splash_range;
+		}
 	//init
 	TANK.try_bomb = {
 		range: range,
@@ -910,17 +939,19 @@ function AA_bomb(TANK, descrition_only, settings_only, ai){
 	if(descrition_only != undefined)
 		return 'Drop single target anti-armor bomb with damage of '+power+'.';
 	if(settings_only != undefined) return {reuse: reuse};
-	if(ai != undefined) return false;
 	
 	if(TANK.try_missile != undefined){
 		delete TANK.try_missile;
-		mouse_click_controll = false;
-		target_range=0;
+		if(TANK.id == MY_TANK.id){
+			mouse_click_controll = false;
+			target_range=0;
+			}
 		return 0;
 		}
-		
-	mouse_click_controll = true;
-	target_range = 0;
+	if(TANK.id == MY_TANK.id){	
+		mouse_click_controll = true;
+		target_range = 0;
+		}
 	//init
 	TANK.try_missile = {
 		range: range,
@@ -1024,7 +1055,7 @@ function do_missile(tank_id, enemy_id, skip_broadcast){
 		return false;
 		}
 		
-	//controll
+	//control
 	nr = TANK.try_missile.ability_nr;
 	if(TANK.abilities_reuse[nr] > Date.now() ) return false; //last check
 	TANK.abilities_reuse[nr] = Date.now() + TANK.try_missile.reuse;
@@ -1036,14 +1067,10 @@ function do_missile(tank_id, enemy_id, skip_broadcast){
 	tmp['bullet_to_target'] = enemy;
 	tmp['bullet_from_target'] = TANK;
 	tmp['damage'] = TANK.try_missile.power;
-	if(TANK.try_missile.pierce != undefined)
-		tmp['pierce_armor'] = 1;
-	if(TANK.try_missile.angle == true)
-		tmp['angle'] = angle;
-	if(TANK.try_missile.icon != undefined)
-		tmp['bullet_icon'] = TANK.try_missile.icon;
-	if(TANK.try_missile.more != undefined)
-		tmp[TANK.try_missile.more[0]] = TANK.try_missile.more[1];
+	if(TANK.try_missile.pierce != undefined)	tmp['pierce_armor'] = 1;
+	if(TANK.try_missile.angle == true)		tmp['angle'] = angle;
+	if(TANK.try_missile.icon != undefined)	tmp['bullet_icon'] = TANK.try_missile.icon;
+	if(TANK.try_missile.more != undefined)	tmp[TANK.try_missile.more[0]] = TANK.try_missile.more[1];
 	BULLETS.push(tmp);
 	
 	//init reuse
@@ -1129,7 +1156,7 @@ function do_bomb(tank_id, distance_ok, skip_broadcast){
 		return false;
 		}
 		
-	//controll
+	//control
 	nr = TANK.try_bomb.ability_nr;
 	if(TANK.abilities_reuse[nr] > Date.now() ) return false; //last check
 	TANK.abilities_reuse[nr] = Date.now() + TANK.try_bomb.reuse;
@@ -1141,14 +1168,9 @@ function do_bomb(tank_id, distance_ok, skip_broadcast){
 	tmp['bullet_to_area'] = [mouseX, mouseY];
 	tmp['bullet_from_target'] = TANK;
 	tmp['damage'] = TANK.try_bomb.power;
-	if(TANK.try_bomb.pierce != undefined)
-		tmp['pierce_armor'] = 1;
-	if(TANK.try_bomb.angle == true)
-		tmp['angle'] = angle;
-	if(TANK.try_bomb.icon != undefined)
-		tmp['bullet_icon'] = TANK.try_bomb.icon;
-	if(TANK.try_bomb.more != undefined)
-		tmp[TANK.try_bomb.more[0]] = TANK.try_bomb.more[1];
+	if(TANK.try_bomb.pierce != undefined)	tmp['pierce_armor'] = 1;
+	if(TANK.try_bomb.icon != undefined)		tmp['bullet_icon'] = TANK.try_bomb.icon;
+	if(TANK.try_bomb.more != undefined)		tmp[TANK.try_bomb.more[0]] = TANK.try_bomb.more[1];
 	if(TANK.try_bomb.aoe != undefined){
 		tmp['aoe_effect'] = 1;
 		tmp['aoe_splash_range'] = TANK.try_bomb.aoe;

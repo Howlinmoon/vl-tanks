@@ -20,6 +20,8 @@ function init_game(first_time){
 		MAX_SENT_PACKETS = 1000;
 		START_GAME_COUNT_MULTI = 5;
 		}
+	if(getCookie("disable_intro") == '1')
+		intro_enabled = 0;
 	unique_id = 0;
 	level = 1;
 	//set width and height
@@ -71,7 +73,7 @@ function intro(force){
 		];
 	var text_gap = 20;
 	
-	if(intro_page+1 > DATA.length || (DEBUG == true && force == undefined)){
+	if(intro_page+1 > DATA.length || (intro_enabled == 0 && force == undefined)){
 		PLACE = 'init';
 		add_first_screen_elements();
 		return false;
@@ -103,6 +105,7 @@ function intro(force){
 	if(intro_page==0){
 		//register skip button
 		register_button(WIDTH_APP-70, HEIGHT_APP-STATUS_HEIGHT-45, 70, 45, PLACE, function(){
+			setCookie("disable_intro", 1, 30);
 			intro_page=0;
 			PLACE = 'init';
 			add_first_screen_elements();
@@ -128,7 +131,7 @@ function check_canvas_sizes(){
 		}
 	else{
 		//full screen
-		var dimensions = get_fimensions();
+		var dimensions = get_dimensions();
 		//map
 		WIDTH_MAP = MAPS[level-1].width;
 		HEIGHT_MAP = MAPS[level-1].height;
@@ -386,7 +389,7 @@ function init_action(map_nr, my_team){
 		if(enemy_team == my_team)
 			enemy_team = 'R';	
 		random_type = possible_types[getRandomInt(0, possible_types.length-1)];
-			//random_type = 8;
+			//random_type = 5;
 		add_tank(1, get_unique_id(), "Bot", random_type, enemy_team, undefined, undefined, undefined, true);
 		for(var i=1; i< MAPS[level-1].team_size; i++){
 			random_type = possible_types[getRandomInt(0, possible_types.length-1)];
