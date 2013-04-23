@@ -392,7 +392,7 @@ function init_action(map_nr, my_team){
 		if(enemy_team == my_team)
 			enemy_team = 'R';	
 		random_type = possible_types[getRandomInt(0, possible_types.length-1)];
-			random_type = 1;
+			//random_type = 1;
 		add_tank(1, get_unique_id(), "Bot", random_type, enemy_team, undefined, undefined, undefined, true);
 		for(var i=1; i< MAPS[level-1].team_size; i++){
 			random_type = possible_types[getRandomInt(0, possible_types.length-1)];
