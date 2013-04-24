@@ -1,15 +1,8 @@
-COUNTRIES.push({
-	name: 'United States',
-	color: 'B',	
-	});
-COUNTRIES.push({
-	name: 'Russia',
-	color: 'R',
-	});
-COUNTRIES.push({
-	name: 'China',
-	color: 'Y',
-	});
+COUNTRIES = {
+	B: {name: 'United States', file: 'us'},
+	R: {name: 'Russia', file: 'ru'},
+	Y: {name: 'China', file: 'ch'},
+	}
 
 //====== TANKS =================================================================
 
@@ -22,7 +15,7 @@ TYPES.push({
 	damage: [15, 1],	//15 dps		//[tank damage in level 0, damage increase in each level]
 	range: 80,					//tank shooting range
 	scout: 100,					//tank scout range
-	armor: [50, 0.3, 60],				//[tank armor in level 0, armor increase in each level, max armor]
+	armor: [50, 0.35, 70],				//[tank armor in level 0, armor increase in each level, max armor]
 	speed: 25,					//speed
 	attack_delay: 1,				//pause between shoots in seconds
 	turn_speed: 4,					//turn speed, higher - faster
@@ -36,10 +29,10 @@ TYPES.push({
 		{name: 'Shield',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],				//[tank size: S/M/L, icon width and height(same)]
-	icon_top: ['top1.png'],				//tank base images
-	icon_base: ['base1.png'],			//tank top images
-	preview: 'preview.png',				//tank preview image
-	bullet: 'bullet.png',				//bullet_image
+	icon_top: true,				//tank base images
+	icon_base: true,			//tank top images
+	preview: true,				//tank preview image
+	bullet: 'bullet',				//bullet_image
 	fire_sound: 'shoot',				//shooting sound
 	accuracy: 90,					//chance to hit target, %
 	});
@@ -53,7 +46,7 @@ TYPES.push({
 	damage: [30, 1.5],		//30 dps
 	range: 80,
 	scout: 100,
-	armor: [30, 0.3, 40],
+	armor: [30, 0.35, 50],
 	speed: 28,
 	attack_delay: 1,
 	turn_speed: 3,
@@ -63,10 +56,10 @@ TYPES.push({
 		{name: 'Damage',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
-	preview: 'preview.png',
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -80,7 +73,7 @@ TYPES.push({
 	damage: [18, 1.3],	//18 dps
 	range: 80,
 	scout: 100,
-	armor: [20, 0.3, 30],
+	armor: [20, 0.35, 40],
 	speed: 30,
 	attack_delay: 1,
 	turn_speed: 5,
@@ -90,10 +83,10 @@ TYPES.push({
 		{name: 'Boost',		passive: false,		broadcast: 0}, 
 		],
 	size: ['M', 50],
-	preview: 'preview.png',
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -117,10 +110,10 @@ TYPES.push({
 		{name: 'Range',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
-	preview: 'preview.png',
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 100,
 	});
@@ -145,10 +138,10 @@ TYPES.push({
 		],
 	size: ['M', 50],
 	ignore_armor: 1,
-	preview: 'preview.png',
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 80,
 	});
@@ -162,7 +155,7 @@ TYPES.push({
 	damage: [15, 1],	//15 dps
 	range: 80,
 	scout: 100,
-	armor: [20, 0.3, 30],
+	armor: [20, 0.35, 40],
 	speed: 28,
 	attack_delay: 1,
 	turn_speed: 4,
@@ -172,10 +165,10 @@ TYPES.push({
 		{name: 'SAM',		passive: false,		broadcast: 1}, 
 		],
 	size: ['M', 50],
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	preview: 'preview.png',
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -189,7 +182,7 @@ TYPES.push({
 	damage: [15, 1.1],	//15 dps
 	range: 80,
 	scout: 100,
-	armor: [20, 0.3, 30],	
+	armor: [20, 0.35, 40],	
 	speed: 28,
 	attack_delay: 1,
 	turn_speed: 4,
@@ -199,10 +192,10 @@ TYPES.push({
 		{name: 'Advanced',	passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	preview: 'preview.png',
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -226,10 +219,10 @@ TYPES.push({
 		{name: 'Medicine',	passive: false,		broadcast: 0}, 
 		],
 	size: ['M', 50],
-	icon_top: [],
-	icon_base: ['base1.png'],
-	preview: 'preview.png',
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: false,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -243,7 +236,7 @@ TYPES.push({
 	damage: [20, 1.3],	//20 dps
 	range: 100,
 	scout: 120,
-	armor: [20, 0.3, 30],	
+	armor: [20, 0.35, 40],	
 	speed: 32,
 	attack_delay: 1,
 	turn_speed: 6,
@@ -255,10 +248,10 @@ TYPES.push({
 		{name: 'Range',		passive: true,		broadcast: 0}, 
 		],
 	size: ['M', 50],
-	icon_top: [],
-	icon_base: ['base1.png'],
-	preview: 'preview.png',
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: false,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -284,10 +277,10 @@ TYPES.push({
 		{name: 'Rest',		passive: false,		broadcast: 1}, 
 		],
 	size: ['M', 50],
-	icon_top: [],
-	icon_base: ['base1.png'],
-	preview: 'preview.png',
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: false,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
@@ -308,15 +301,15 @@ TYPES.push({
 	no_repawn: 1,
 	abilities: [],
 	size: ['S', 30],
-	preview: 'preview.png',
-	icon_top: [],
-	icon_base: ['base1.png'],
-	bullet: 'bullet.png',
+	preview: true,
+	icon_top: false,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
-//TOWER
+//Tower
 TYPES.push({
 	name: 'Tower',
 	type: 'tower',
@@ -325,22 +318,22 @@ TYPES.push({
 	damage: [30, 0],	//30 dps
 	range: 120,
 	scout: 130,
-	armor: [20,0,20],
+	armor: [20, 0, 20],
 	speed: 0,
 	attack_delay: 1.1,
 	turn_speed: 4,
 	no_repawn: 1,
 	abilities: [],
 	size: ['L', 50],
-	preview: '',
-	icon_top: ['top1.png'],
-	icon_base: ['base1.png'],
-	bullet: 'bullet.png',
+	preview: false,
+	icon_top: true,
+	icon_base: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});
 
-//BASE
+//Base
 TYPES.push({
 	name: 'Base',
 	type: 'tower',
@@ -349,17 +342,18 @@ TYPES.push({
 	damage: [45, 0],	//45 dps
 	range: 120,
 	scout: 130,
-	armor: [50,0,50],
+	armor: [50, 0, 50],
 	speed: 0,
 	attack_delay: 1.1,
 	turn_speed: 4,
 	no_repawn: 1,
 	abilities: [],
 	size: ['L', 90],
-	preview: '',
-	icon_top: [],
-	icon_base: ['base1.png', 'no-rotate'],
-	bullet: 'bullet.png',
+	preview: false,
+	icon_top: false,
+	icon_base: true,
+	no_base_rotate: true,
+	bullet: 'bullet',
 	fire_sound: 'shoot',
 	accuracy: 90,
 	});

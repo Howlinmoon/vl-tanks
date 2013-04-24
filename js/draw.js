@@ -220,9 +220,7 @@ function draw_main(){
 	//target	
 	if(mouse_click_controll==true){
 		//target
-		img = new Image();
-		img.src = '../img/target.png';
-		canvas_main.drawImage(img, mouse_pos[0]-15, mouse_pos[1]-15);
+		draw_image(canvas_main, 'target', mouse_pos[0]-15, mouse_pos[1]-15);
 		
 		if(target_range != 0){
 			//circle
@@ -253,6 +251,83 @@ function draw_main(){
 	if(render_mode == 'requestAnimationFrame')
 		requestAnimationFrame(draw_main);
 	}
+function add_first_screen_elements(){
+	add_settings_buttons(canvas_backround, ["Single player","Multiplayer","Settings"]);
+	
+	name_tmp = getCookie("name");
+	if(name_tmp != ''){
+		name = name_tmp;
+		if(DEBUG==true)
+			name = name_tmp+Math.floor(Math.random()*99);
+		}
+	name = name.toLowerCase().replace(/[^\w]+/g,'').replace(/ +/g,'-');
+	name = name[0].toUpperCase() + name.slice(1);
+	name = name.substring(0, 10);
+	
+	counter_tmp = getCookie("start_count");
+	if(counter_tmp != ''){
+		START_GAME_COUNT_SINGLE = counter_tmp;
+		}
+	if(MUTE_MUSIC==false && audio_main != undefined)
+		audio_main.pause();
+	
+	draw_status_bar();
+	PLACE == 'init';
+	
+	for (i in settings_positions){
+		//register menu buttons
+		register_button(settings_positions[i].x, settings_positions[i].y, settings_positions[i].width, settings_positions[i].height, 'init', function(xx, yy, extra){
+			if(extra==0){
+				// single player
+				game_mode = 1;
+				start_game_timer_id = setInterval(starting_game_timer_handler, 1000);
+				draw_tank_select_screen();
+				}
+			else if(extra==1){
+				room_id_to_join = -1;
+				//multi player
+				if(socket_live==false)
+					connect_server();
+				draw_rooms_list();
+				}
+			else if(extra==2){
+				//settings
+				add_settings_buttons(canvas_backround, ["Player name: "+name, "Start game counter: "+START_GAME_COUNT_SINGLE, "Back"]);
+				PLACE = 'settings';
+				}
+			}, i);
+		register_button(settings_positions[i].x, settings_positions[i].y, settings_positions[i].width, settings_positions[i].height, 'settings', function(xx, yy, extra){
+			if(extra==0){
+				//edit name
+				var name_tmp = prompt("Please enter your name", name);
+				if(name_tmp != null){
+					name = name_tmp;
+					name = name.toLowerCase().replace(/[^\w]+/g,'').replace(/ +/g,'-');
+					name = name[0].toUpperCase() + name.slice(1);
+					name = name.substring(0, 10);
+					add_settings_buttons(canvas_backround, ["Player name: "+name, "Start game counter: "+START_GAME_COUNT_SINGLE, "Back"]);
+					setCookie("name", name, 30);
+					}
+				}
+			else if(extra==1){
+				//edit start game couter
+				var value_tmp = prompt("Please enter number 1-30", START_GAME_COUNT_SINGLE);
+				if(value_tmp != null){
+					START_GAME_COUNT_SINGLE = parseInt(value_tmp);
+					if(START_GAME_COUNT_SINGLE < 1 || isNaN(START_GAME_COUNT_SINGLE)==true)		START_GAME_COUNT_SINGLE = 1;
+					if(START_GAME_COUNT_SINGLE > 30)		START_GAME_COUNT_SINGLE = 30;
+					add_settings_buttons(canvas_backround, ["Player name: "+name, "Start game counter: "+START_GAME_COUNT_SINGLE, "Back"]);
+					setCookie("start_count", START_GAME_COUNT_SINGLE, 30);
+					}
+				}
+			else if(extra==2){
+				//back to first screen
+				add_settings_buttons(canvas_backround, ["Single player","Multiplayer","Settings"]);
+				PLACE = 'init';
+				}
+			}, i);
+		}
+	}
 var settings_positions = [];
 var last_active_tab = -1;
 var logo_visible = 1;
@@ -278,14 +353,8 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 	canvas_backround.fillRect(0, 0, WIDTH_APP, HEIGHT_APP-27);
 		
 	//back image
-	var background_elem = get_element_by_name('background');
-	if(background_elem==false)
-		alert("ERROR: missing element 'background' config in draw_map().");
-	backround_width = background_elem.size[0];
-	backround_height = background_elem.size[1];
-	var img_texture = new Image();
-	img_texture.src = '../img/map/'+background_elem.file;	
-	
+	backround_width = 400;
+	backround_height = 400;
 	for(var i=0; i<Math.ceil((HEIGHT_APP-27)/backround_height); i++){ 
 		for(var j=0; j<Math.ceil(WIDTH_APP/backround_width); j++){
 			var xx = j*backround_width;
@@ -296,7 +365,7 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 				bwidth = WIDTH_APP-xx;
 			if(yy+bheight > HEIGHT_APP-27)
 				bheight = HEIGHT_APP-27-yy;
-			canvas_backround.drawImage(img_texture, 0, 0, backround_width, backround_height, xx, yy, bwidth, bheight);
+			canvas_backround.drawImage(IMAGE_MOON, 0, 0, backround_width, backround_height, xx, yy, bwidth, bheight);
 			}
 		}
 	
@@ -314,10 +383,8 @@ function add_settings_buttons(canvas_this, text_array, active_i){
 	register_button(160, 340-48, 477, 52, 'init', function(){ draw_logo_tanks(160, 340-52); });
 	
 	//logo
-	var img = new Image();
-	img.src = '../img/logo.png';
 	var left = (WIDTH_APP-598)/2;	
-	canvas_backround.drawImage(img, left, 15);
+	canvas_backround.drawImage(IMAGE_LOGO, left, 15);
 	
 	//intro text
 	canvas_backround.font = "Normal 18px Arial";
@@ -362,15 +429,12 @@ function draw_logo_tanks(left, top, change_logo){
 	var block_width = 600;
 	var block_height = 62;
 	//clear
-	var background_elem = get_element_by_name('background');
-	var backround_width = background_elem.size[0];
-	var backround_height = background_elem.size[1];
-	var img = new Image();	 
-	img.src = '../img/map/'+background_elem.file;
+	var backround_width = 400;
+	var backround_height = 400;
 	var btop = top-7;
-	canvas_backround.drawImage(img, 0, btop, backround_width, block_height, 0, btop, backround_width, block_height);
+	canvas_backround.drawImage(IMAGE_MOON, 0, btop, backround_width, block_height, 0, btop, backround_width, block_height);
 	if(left+block_width>backround_width)
-		canvas_backround.drawImage(img, 0, btop, backround_width, block_height, backround_width, btop, backround_width, block_height);
+		canvas_backround.drawImage(IMAGE_MOON, 0, btop, backround_width, block_height, backround_width, btop, backround_width, block_height);
 
 	if(change_logo==undefined){
 		if(logo_visible==0){
@@ -392,16 +456,24 @@ function draw_logo_tanks(left, top, change_logo){
 		if(TYPES[t].type != 'tank') continue;
 		var tank_size = TYPES[t].size[1];
 		//base
-		var img = new Image();
-		img.src = '../img/tanks/'+TYPES[t].name+'/'+TYPES[t].icon_base[0];
-		if(TYPES[t].size[1] < max_size)	//normal
-			canvas_backround.drawImage(img, left+t*round(477/n)+(50-tank_size)/2, top+52-tank_size);
-		else	//resized
-			canvas_backround.drawImage(img, 0, 0, tank_size, tank_size, left+t*(477/n)+(50-max_size)/2, top+52-max_size, max_size, max_size);
+		if(TYPES[t].size[1] < max_size){	
+			//original size
+			draw_image(canvas_backround, TYPES[t].name,
+				left+t*round(477/n)+(50-tank_size)/2, top+52-tank_size, TYPES[t].size[1], TYPES[t].size[1],
+				100, 0, TYPES[t].size[1], TYPES[t].size[1]);
+				}	
+		else{	
+			//resized
+			draw_image(canvas_backround, TYPES[t].name,
+				left+t*round(477/n)+(50-tank_size)/2, top+52-tank_size, max_size, max_size,
+				100, 0, TYPES[t].size[1], TYPES[t].size[1]);
+			}
 		//turret
-		var img = new Image();
-		img.src = '../img/tanks/'+TYPES[t].name+'/'+TYPES[t].icon_top[0];
-		canvas_backround.drawImage(img, left+t*round(477/n)+(50-tank_size)/2, top+52-tank_size);
+		if(TYPES[t].icon_top != false){
+			draw_image(canvas_backround, TYPES[t].name,
+				left+t*round(477/n)+(50-tank_size)/2, top+52-tank_size, TYPES[t].size[1], TYPES[t].size[1],
+				150, 0, TYPES[t].size[1], TYPES[t].size[1]);
+			}
 		}
 	}
 var score_button_pos = new Array();
@@ -437,7 +509,7 @@ function draw_final_score(live, lost_team){
 		}
 	if(live==false){					//final scores
 		//add some score to winning team
-		if(lost_team != false){									log('adding scores');
+		if(lost_team != false){
 			for (var i in TANKS){
 				if(TANKS[i].team == lost_team)
 					continue;
@@ -458,9 +530,7 @@ function draw_final_score(live, lost_team){
 		canvas_map.clearRect(0, 0, WIDTH_SCROLL, HEIGHT_SCROLL);
 		
 		//background
-		var img = new Image();
-		img.src = '../img/background.jpg';
-		canvas_backround.drawImage(img, 0, 0, 700, 500, 0, 0, WIDTH_APP, HEIGHT_APP-27);
+		canvas_backround.drawImage(IMAGE_BACK, 0, 0, 700, 500, 0, 0, WIDTH_APP, HEIGHT_APP-27);
 		
 		canvas_backround.strokeStyle = "#000000";	
 		canvas_backround.fillStyle = "rgba(255, 255, 255, 0.7)";
@@ -554,17 +624,9 @@ function draw_final_score(live, lost_team){
 			canvas.fillText(j, Math.round((WIDTH_APP-button_width)/2)+10, text_y);
 			
 			//flag
-			flag_index = 1;
-			for(var c in COUNTRIES){
-				if(TANKS[i].team == COUNTRIES[c].color)
-					flag_index = c;	
-				}
-			var flag = new Image();
-			flag.src = '../img/flags.png';
-			canvas.drawImage(flag, 0, flag_index*flag_height, flag_width, flag_height, 
+			draw_image(canvas, COUNTRIES[TANKS[i].team].file, 
 				Math.round((WIDTH_SCROLL-button_width)/2)+30, 
-				top_margin+(button_height+buttons_gap)*j+flag_space, 
-				flag_width, flag_height);
+				top_margin+(button_height+buttons_gap)*j+flag_space);
 	
 			//name
 			canvas.fillStyle = "#000000";
@@ -666,13 +728,8 @@ function draw_tank_select_screen(selected_tank){
 		}
 	
 	//background
-	if(last_selected == -1){
-		canvas_backround.fillStyle = "#f0f9e4";
-		canvas_backround.fillRect(0, 0, WIDTH_APP, HEIGHT_APP-27);
-		img = new Image();
-		img.src = '../img/background.jpg';
-		canvas_backround.drawImage(img, 0, 0, 700, 500, 0, 0, WIDTH_APP, HEIGHT_APP-27);
-		}
+	if(last_selected == -1)
+		canvas_backround.drawImage(IMAGE_BACK, 0, 0, 700, 500, 0, 0, WIDTH_APP, HEIGHT_APP-27);
 	
 	//show all possible tanks
 	j = 0;
@@ -697,15 +754,12 @@ function draw_tank_select_screen(selected_tank){
 			//logo
 			var pos1 = 15+j*(preview_xy+gap);
 			var pos2 = y;
-			drawImage_preloaded(canvas_backround, '../img/tanks/'+TYPES[i].name+'/'+TYPES[i].preview, pos1, pos2, PLACE, 90, 90, back_color, pos1+2, pos2+2, 90-4, 90-4);
+			draw_image(canvas_backround, TYPES[i].name, pos1, pos2);
 			
 			//if bonus
 			ROOM = get_room_by_id(opened_room_id);
-			if(game_mode == 2 && ROOM.settings[0]=='normal' && TYPES[i].bonus != undefined){
-				var img_lock = new Image();
-				img_lock.src = '../img/lock.png';
-				canvas_backround.drawImage(img_lock, pos1+90-14-5, pos2+90-20-5);
-				}
+			if(game_mode == 2 && ROOM.settings[0]=='normal' && TYPES[i].bonus != undefined)
+				draw_image(canvas_backround, 'lock', pos1+90-14-5, pos2+90-20-5);
 			
 			//register button
 			register_button(15+j*(preview_xy+gap)+1, y+1, preview_xy, preview_xy, PLACE, function(mouseX, mouseY, index){
@@ -741,10 +795,9 @@ function draw_tank_select_screen(selected_tank){
 
 	//tank stats
 	if(selected_tank != undefined){
-		var src = '../img/tanks/'+TYPES[selected_tank].name+'/'+TYPES[selected_tank].preview;
 		var pos1 = info_left+10;
 		var pos2 = y+((info_block_height-preview_xy)/2);
-		drawImage_preloaded(canvas_backround, src, pos1, pos2, PLACE, 90, 90, '#ffffff', pos1, pos2, 90, 90);
+		draw_image(canvas_backround, TYPES[selected_tank].name, pos1, pos2);
 		
 		canvas_backround.font = "bold 18px Verdana";
 		canvas_backround.fillStyle = "#196119";
@@ -821,8 +874,9 @@ function draw_tank_select_screen(selected_tank){
 					src = '../img/tanks/'+TYPES[tank_i].name+'/'+TYPES[tank_i].preview;
 					var pos1 = 122+gap+15+j*(ICON_WIDTH+2+gap);
 					var pos2 = y;
-					drawImage_preloaded(canvas_backround, src, pos1, pos2, PLACE, ICON_WIDTH, ICON_WIDTH, back_color, pos1+2, pos2+2, ICON_WIDTH-4, ICON_WIDTH-4);
-					
+					draw_image(canvas_backround, TYPES[tank_i].name, 
+						pos1, pos2, ICON_WIDTH, ICON_WIDTH,
+						0, 0, 90, 90);
 					j++;
 					}
 				}
@@ -845,9 +899,7 @@ function draw_timer_graph(){
 	graph_height=40;
 	
 	//background
-	img = new Image();
-	img.src = '../img/background.jpg';
-	canvas_backround.drawImage(img, 15-2, red_line_y-2, graph_width+4, graph_height+4, 15-2, red_line_y-2, graph_width+4, graph_height+4);
+	canvas_backround.drawImage(IMAGE_BACK, 15-2, red_line_y-2, graph_width+4, graph_height+4, 15-2, red_line_y-2, graph_width+4, graph_height+4);
 	
 	//red block
 	canvas_backround.strokeStyle = "#c10000";
@@ -878,7 +930,7 @@ function update_preload(images_loaded){
 	canvas_backround.fillStyle = "#dbd9da";
 	roundRect(canvas_backround, 0, HEIGHT_APP-24, WIDTH_APP, 23, 0, true);
 	
-	if(preload_left==0 || preload_left < 3){
+	if(preload_left==0){
 		preloaded=true;
 		//add_first_screen_elements();
 		intro();
@@ -918,11 +970,6 @@ function show_chat(){
 		if(CHAT_LINES[i].shift==1 && PLACE == 'game' && CHAT_LINES[i].team == MY_TANK.team && CHAT_LINES[i].author !== false)
 			text = "[Team] "+text;
 			
-		//background
-		/*canvas.font = "normal 13px Helvetica";
-		canvas.fillStyle = "#dbd9da";
-		roundRect(canvas, 5, bottom-i*gap-13, text.length*7+10, 17, 3, true);*/
-		
 		//text color
 		if(CHAT_LINES[i].author===false)		canvas.fillStyle = "#222222";	//system chat
 		else if(CHAT_LINES[i].team == 'R')		canvas.fillStyle = "#8f0c12";	//team red
@@ -980,4 +1027,57 @@ function body_rotation(obj, str, speed, rot, time_diff){
 		flag = true;
 	}
 	return flag;
+	}
+function draw_image(canvas, name, x, y, max_w, max_h, offset_x, offset_y, clip_w, clip_h){
+	if(offset_x == undefined) offset_x = 0;
+	if(offset_y == undefined) offset_y = 0;	
+		
+	//check general images
+	if(IMAGES_SETTINGS.general[name] != undefined){
+		if(max_w == undefined)	max_w = IMAGES_SETTINGS.general[name].w;
+		if(max_h == undefined)	max_h = IMAGES_SETTINGS.general[name].h;
+		if(clip_w == undefined)	clip_w = max_w;
+		if(clip_h == undefined)	clip_h = max_h;
+		canvas.drawImage(IMAGES_GENERAL,
+			IMAGES_SETTINGS.general[name].x+offset_x, IMAGES_SETTINGS.general[name].y+offset_y, clip_w, clip_h, 
+			x, y, max_w, max_h); 
+		return true;
+		}
+	
+	//chec bullets
+	if(IMAGES_SETTINGS.bullets[name] != undefined){
+		if(max_w == undefined)	max_w = IMAGES_SETTINGS.bullets[name].w;
+		if(max_h == undefined)	max_h = IMAGES_SETTINGS.bullets[name].h;
+		if(clip_w == undefined)	clip_w = max_w;
+		if(clip_h == undefined)	clip_h = max_h;
+		canvas.drawImage(IMAGES_BULLETS, 
+			IMAGES_SETTINGS.bullets[name].x+offset_x, IMAGES_SETTINGS.bullets[name].y+offset_y, clip_w, clip_h, 
+			x, y, max_w, max_h); 
+		return true;	
+		}
+	
+	//check elements
+	if(IMAGES_SETTINGS.elements[name] != undefined){
+		if(max_w == undefined)	max_w = IMAGES_SETTINGS.elements[name].w;
+		if(max_h == undefined)	max_h = IMAGES_SETTINGS.elements[name].h;
+		if(clip_w == undefined)	clip_w = max_w;
+		if(clip_h == undefined)	clip_h = max_h;
+		canvas.drawImage(IMAGES_ELEMENTS, 
+			IMAGES_SETTINGS.elements[name].x+offset_x, IMAGES_SETTINGS.elements[name].y+offset_y, clip_w, clip_h, 
+			x, y, max_w, max_h); 
+		return true;
+		}
+		
+	//check tanks
+	if(IMAGES_SETTINGS.tanks[name] != undefined){
+		if(max_w == undefined)	max_w = IMAGES_SETTINGS.tanks[name].w;
+		if(max_h == undefined)	max_h = IMAGES_SETTINGS.tanks[name].h;
+		if(clip_w == undefined)	clip_w = max_w;
+		if(clip_h == undefined)	clip_h = max_h;
+		canvas.drawImage(IMAGES_TANKS, 
+			IMAGES_SETTINGS.tanks[name].x+offset_x, IMAGES_SETTINGS.tanks[name].y+offset_y, clip_w, clip_h, 
+			x, y, max_w, max_h); 
+		return true;
+		}
+	log('Error: can not find image "'+name+'".');
 	}

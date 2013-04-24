@@ -31,10 +31,7 @@ function draw_status_bar(){
 function draw_mute_music_button(){
 	PADDING = 55;
 	
-	q_img = new Image();
-	q_img.src = '../img/button.png';
-	canvas_backround.drawImage(q_img, WIDTH_APP-PADDING, HEIGHT_APP-23);
-	
+	draw_image(canvas_backround, 'button', WIDTH_APP-PADDING, HEIGHT_APP-23);
 	fs_text = "Music";
 	if(MUTE_MUSIC == true)
 		canvas_backround.fillStyle = "#8A8A8A";
@@ -49,10 +46,7 @@ function draw_mute_music_button(){
 function draw_mute_fx_button(){
 	PADDING = 108;
 	
-	q_img = new Image();
-	q_img.src = '../img/button.png';
-	canvas_backround.drawImage(q_img, WIDTH_APP-PADDING, HEIGHT_APP-23);
-	
+	draw_image(canvas_backround, 'button', WIDTH_APP-PADDING, HEIGHT_APP-23);
 	fs_text = "Sound";
 	if(MUTE_FX == true)
 		canvas_backround.fillStyle = "#8A8A8A";
@@ -66,10 +60,8 @@ function draw_mute_fx_button(){
 //show quality button in statusbar
 function draw_quality_button(first_run){
 	PADDING = 161;
-	q_img = new Image();
-	q_img.src = '../img/button.png';
-	canvas_backround.drawImage(q_img, WIDTH_APP-PADDING, HEIGHT_APP-23);
 	
+	draw_image(canvas_backround, 'button', WIDTH_APP-PADDING, HEIGHT_APP-23);
 	quality_cookie = getCookie("quality");
 	if(quality_cookie != '')
 		QUALITY = quality_cookie;
@@ -105,9 +97,8 @@ function draw_quality_button(first_run){
 //quit button in statusbar
 function draw_quit_button(){
 	PADDING = 214;
-	quit_img = new Image();
-	quit_img.src = '../img/button.png';
-	canvas_backround.drawImage(quit_img, WIDTH_APP-PADDING, HEIGHT_APP-23);
+	
+	draw_image(canvas_backround, 'button', WIDTH_APP-PADDING, HEIGHT_APP-23);
 	q_text = "Quit";
 	canvas_backround.fillStyle = "#c10000";
 	canvas_backround.font = "Bold 11px Helvetica";
@@ -120,10 +111,7 @@ function draw_fs_button(){
 	if(PLACE != 'game' ) return false;
 	PADDING = 267;
 	
-	q_img = new Image();
-	q_img.src = '../img/button.png';
-	canvas_backround.drawImage(q_img, WIDTH_APP-PADDING, HEIGHT_APP-23);
-	
+	draw_image(canvas_backround, 'button', WIDTH_APP-PADDING, HEIGHT_APP-23);
 	fs_text = "Full Scr.";
 	canvas_backround.fillStyle = "#8A8A8A";
 	canvas_backround.font = "Normal 11px Arial";
@@ -142,25 +130,25 @@ function draw_version(){
 	}
 //do mute or unmute music
 function mute_unmute_music(){
-	if(MUTE_MUSIC==false){	
+	if(MUTE_MUSIC==false){
 		//disable sound
 		MUTE_MUSIC = true;
 		setCookie("mute_music", "1", 30);
-		if(audio_main != undefined) audio_main.pause();
+		if(audio_main != undefined)
+			audio_main.pause();
 		}
 	else{
 		//enable sound
 		MUTE_MUSIC = false;
 		setCookie("mute_music", "0", 30);
-		//try{
+		try{
 			if(PLACE == 'game'){
-				//audio_main = document.createElement('audio');
-				var audio_main = document.getElementById("audio-main");
-				//audio_main.setAttribute('src', '../sounds/main'+SOUND_EXP);
-				//audio_main.setAttribute('loop', 'loop');
+				audio_main = document.createElement('audio');
+				audio_main.setAttribute('src', '../sounds/main'+SOUND_EXT);
+				audio_main.setAttribute('loop', 'loop');
 				audio_main.play();
 				}
-			//}catch(error){}
+			}catch(error){}
 		}
 	draw_mute_music_button();
 	}

@@ -1,9 +1,11 @@
+tower kill annoucne bug
 IDEAS
+	towers regen hp?
+	restricted minions mode
 	new units
-		sniper
-		Drone: medium hp, medium armor, high dps, but extremely low range. Skills: blink, glue, steal essence.
-		sieger - explosive bullets/dig+range+armor/range
-		vampire - steal energy, % of dmg is returned as hp
+		Drone: medium hp, medium armor, high dps, but low range. Skills: plasma shot+vr?, blink, slow.
+		sniper: low damage, 0 armor, low hp, skills: Strike, perma hide, unhide.	
+		sieger - explosive bullets, dig+range, undig
 	truck -> APC instead or LAV?
 	Helium3
 		base, mines generates, spawn takes, on 0 - team dies.
@@ -18,4 +20,3 @@ IDEAS
 		Nanobots to bomber?
 		destruction
 		glue
-combine sprites

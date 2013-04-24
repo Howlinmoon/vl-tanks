@@ -5,14 +5,14 @@ function draw_tank(tank){
 	var tank_size =  TYPES[tank.type].size[1];
 	var visibility = 0;
 	
-	if(tank.y > -1*map_offset[1] + HEIGHT_SCROLL && FS==false){}	//skip - object below visible zone
-	else if(tank.y+tank_size < -1*map_offset[1] && FS==false){}		//skip - object above visible zone
-	else if(tank.x > -1*map_offset[0] + WIDTH_SCROLL && FS==false){}		//skip - object on right from visible zone
-	else if(tank.x+tank_size < -1*map_offset[0] && FS==false){}		//skip - object on left from above visible zone
+	if(tank.y > -1*map_offset[1] + HEIGHT_SCROLL && FS==false){}	//below visible zone
+	else if(tank.y+tank_size < -1*map_offset[1] && FS==false){}	//above visible zone
+	else if(tank.x > -1*map_offset[0] + WIDTH_SCROLL && FS==false){} //on right from visible zone
+	else if(tank.x+tank_size < -1*map_offset[0] && FS==false){}	//on left from visible zone
 	else{
 		visibility = 1;
 		
-		if(tank.dead == 1)		tank_size = tank_size/2; //dead
+		if(tank.dead == 1)	tank_size = tank_size/2; //dead
 		if(check_enemy_visibility(tank)==false)	return false; //out of sight
 		
 		lighten_pixels(tank);
@@ -77,12 +77,12 @@ function draw_tank(tank){
 				}
 			
 			//draw tank base
-			img_me = new Image();
-			img_me.src = '../img/tanks/'+TYPES[tank.type].name+'/'+TYPES[tank.type].icon_base[0];
-			if(TYPES[tank.type].icon_base[1] == "no-rotate"){
+			if(TYPES[tank.type].no_base_rotate === true){
 				//draw without rotation
 				tmp_object.restore();
-				tmp_object.drawImage(img_me, padding, padding, tank_size, tank_size);
+				draw_image(tmp_object, TYPES[tank.type].name,
+					padding, padding, undefined, undefined,	
+					100, 0, TYPES[tank.type].size[1], TYPES[tank.type].size[1]);
 				tmp_object.save();
 				tmp_object.translate(round(tank_size/2)+padding, round(tank_size/2)+padding);
 				tmp_object.rotate(tank.angle * TO_RADIANS);
@@ -90,29 +90,29 @@ function draw_tank(tank){
 			else{
 				tmp_object.translate(round(tank_size/2)+padding, round(tank_size/2)+padding);
 				tmp_object.rotate(tank.angle * TO_RADIANS);
-				tmp_object.drawImage(img_me, -1*round(tank_size/2), -1*round(tank_size/2), tank_size, tank_size);
+				draw_image(tmp_object, TYPES[tank.type].name,
+					-1*round(tank_size/2), -1*round(tank_size/2), tank_size, tank_size,
+					100, 0, TYPES[tank.type].size[1], TYPES[tank.type].size[1]);
 				}
 			tmp_object.restore();
 			
 			//draw top
-			if(TYPES[tank.type].icon_top[0] != undefined){
-				if(tank.dead != 1){
-					tmp_object.save();
-					img_me = new Image();
-					img_me.src = '../img/tanks/'+TYPES[tank.type].name+'/'+TYPES[tank.type].icon_top[0];
-					tmp_object.translate(round(tank_size/2)+padding, round(tank_size/2)+padding);
-					tmp_object.rotate(tank.fire_angle * TO_RADIANS);
-					tmp_object.drawImage(img_me, -(tank_size/2), -(tank_size/2), tank_size, tank_size);
-					tmp_object.restore();
-					}
+			if(TYPES[tank.type].icon_top != false && tank.dead != 1){
+				tmp_object.save();
+				tmp_object.translate(round(tank_size/2)+padding, round(tank_size/2)+padding);
+				tmp_object.rotate(tank.fire_angle * TO_RADIANS);
+				draw_image(tmp_object, TYPES[tank.type].name,
+					-(tank_size/2), -(tank_size/2), tank_size, tank_size, 
+					150, 0, TYPES[tank.type].size[1], TYPES[tank.type].size[1]);
+				tmp_object.restore();
 				}
 
 			//draw extra layer
 			for (i in tank.buffs){
 				if(tank.buffs[i].icon != undefined){
-					img_me = new Image();
-					img_me.src = '../img/'+tank.buffs[i].icon;
-					tmp_object.drawImage(img_me, padding+tank_size/2-tank.buffs[i].icon_size[0]/2, padding+tank_size/2-tank.buffs[i].icon_size[1]/2);
+					draw_image(tmp_object, tank.buffs[i].icon,
+						padding+tank_size/2-tank.buffs[i].icon_size[0]/2,
+						padding+tank_size/2-tank.buffs[i].icon_size[1]/2);
 					}
 				if(tank.buffs[i].circle != undefined){
 					tmp_object.beginPath();
@@ -142,7 +142,7 @@ function draw_tank(tank){
 			tank.cache_tank = [];
 			tank.cache_tank.object = tmp_canvas;
 			tank.cache_tank.unique = cache_id;
-			tank.cache_tank.time = Date.now()+2000;
+			tank.cache_tank.time = Date.now()+3000;
 			
 			//show
 			canvas_main.drawImage(tmp_canvas, round(tank.x+map_offset[0])-padding, round(tank.y+map_offset[1])-padding);
@@ -217,21 +217,12 @@ function add_player_name(tank){
 		tmp_canvas.height = 100;
 		var tmp_object = tmp_canvas.getContext("2d");
 	
-		//find flag
-		var flag_index = 0;
-		for(var c in COUNTRIES){
-			if(tank.team == COUNTRIES[c].color)
-				flag_index = c;	
-			}
-				
 		//flag
 		var flag_gap = 4;
 		var total_width = flag_width + flag_gap + tmp_object.measureText(player_name).width;
 		var name_pos_x = round(TYPES[tank.type].size[1]/2 + name_padding - total_width/2);
-		if(name_pos_x < 0) name_pos_x = 0;
-		var flag = new Image();
-		flag.src = '../img/flags.png';
-		tmp_object.drawImage(flag, 0, flag_index*flag_height, flag_width, flag_height, name_pos_x, 4, flag_width, flag_height);
+		if(name_pos_x < 0) name_pos_x = 0;		
+		draw_image(tmp_object, COUNTRIES[tank.team].file, name_pos_x, 4);
 		
 		//name
 		tmp_object.fillStyle = "#000000";
@@ -364,25 +355,22 @@ function draw_bullets(TANK, time_gap){
 					}
 				
 				//draw aoe explosion
-				img = new Image();
-				img.src = '../img/explosion_big.png';
-				canvas_main.drawImage(img, BULLETS[b].x-25+map_offset[0], BULLETS[b].y-25+map_offset[1]);
+				draw_image(canvas_main, 'explosion', BULLETS[b].x-25+map_offset[0], BULLETS[b].y-25+map_offset[1]);
 				}
 			
 			//remove bullet
 			BULLETS.splice(b, 1); b--;	//must be done after splice
 			}
-		else{											
+		else{
 			//draw bullet
-			img_bullet = new Image();
 			if(BULLETS[b].bullet_icon != undefined){	
 				//custom bullet
-				img_bullet.src = '../img/bullets/'+BULLETS[b].bullet_icon;
+				var bullet_img = BULLETS[b].bullet_icon;
 				bullet_stats = get_bullet(BULLETS[b].bullet_icon);
 				}
 			else{	
 				//default bullet
-				img_bullet.src = '../img/bullets/'+TYPES[TANK.type].bullet;
+				var bullet_img = TYPES[TANK.type].bullet;
 				bullet_stats = get_bullet(TYPES[TANK.type].bullet);
 				}
 			if(TYPES[TANK.type].bullet==undefined) continue;
@@ -407,7 +395,10 @@ function draw_bullets(TANK, time_gap){
 					//add data
 					tmp_object.translate(round(bullet_stats.size[0]/2)+padding, round(bullet_stats.size[1]/2)+padding);
 					tmp_object.rotate((BULLETS[b].angle) * TO_RADIANS);
-					tmp_object.drawImage(img_bullet, -(bullet_stats.size[0]/2), -(bullet_stats.size[1]/2), bullet_stats.size[0], bullet_stats.size[1]);
+					tmp_object.drawImage(IMAGES_BULLETS, 
+						IMAGES_SETTINGS.bullets[bullet_img].x, IMAGES_SETTINGS.bullets[bullet_img].y, 
+						IMAGES_SETTINGS.bullets[bullet_img].w, IMAGES_SETTINGS.bullets[bullet_img].h,
+						-(bullet_stats.size[0]/2), -(bullet_stats.size[1]/2), bullet_stats.size[0], bullet_stats.size[1]);
 					
 					//save to cache
 					BULLETS[b].bullet_cache = tmp_canvas;
@@ -418,7 +409,7 @@ function draw_bullets(TANK, time_gap){
 				}
 			else{
 				//simple - no rotate
-				canvas_main.drawImage(img_bullet, bullet_x, bullet_y);
+				draw_image(canvas_main, bullet_img, bullet_x, bullet_y);
 				}
 			}
 		}
@@ -493,7 +484,7 @@ function draw_tank_move(mouseX, mouseY){
 			if(MUTE_FX==false){
 				try{
 					audio_finish = document.createElement('audio');
-					audio_finish.setAttribute('src', '../sounds/click'+SOUND_EXP);
+					audio_finish.setAttribute('src', '../sounds/click'+SOUND_EXT);
 					audio_finish.play();
 					}
 				catch(error){}
@@ -507,7 +498,7 @@ function check_collisions(xx, yy, TANK){
 	if(TANK.automove != undefined) return false;
 	xx = Math.round(xx);
 	yy = Math.round(yy);
-	var tank_size_half = round(TYPES[TANK.type].size[1]/2);
+	var tank_size_half = round(TYPES[TANK.type].size[1]/2);	
 
 	//borders
 	if(xx < 0 || yy < 0) return true;
@@ -529,8 +520,8 @@ function check_collisions(xx, yy, TANK){
 		if(MAPS[level-1].elements[e][4]!=0 && MAPS[level-1].elements[e][4] < elem_height)
 			elem_height = MAPS[level-1].elements[e][4];
 		//check
-		if(yy > elem_y && yy < elem_y+elem_height){
-			if(xx > elem_x && xx < elem_x+elem_width){
+		if(yy >= elem_y && yy <= elem_y+elem_height){
+			if(xx >= elem_x && xx <= elem_x+elem_width){
 				return true;
 				}
 			}
@@ -861,8 +852,12 @@ function draw_fire(TANK, TANK_TO){
 	dist_y = TANK_TO.y+TYPES[TANK_TO.type].size[1]/2 - explode_y;
 	radiance = Math.atan2(dist_y, dist_x);
 	explode_x = explode_x + Math.cos(radiance)*(TYPES[TANK.type].size[1]/2+10);
-	explode_y = explode_y + Math.sin(radiance)*(TYPES[TANK.type].size[1]/2+10);			
-	drawImage_rotated(canvas_main, '../img/explosion.png', explode_x+map_offset[0], explode_y+map_offset[1], 24, 32, TANK.fire_angle);
+	explode_y = explode_y + Math.sin(radiance)*(TYPES[TANK.type].size[1]/2+10);
+	canvas_main.save();
+	canvas_main.translate(explode_x+map_offset[0], explode_y+map_offset[1]);
+	canvas_main.rotate(TANK.fire_angle * TO_RADIANS);
+	draw_image(canvas_main, "fire", -(24/2), -(32/2));
+	canvas_main.restore();
 	}
 //shooting
 function shoot_sound(TANK){
@@ -871,7 +866,7 @@ function shoot_sound(TANK){
 	if(TYPES[TANK.type].fire_sound == undefined) return false;
 	try{
 		var audio_fire = document.createElement('audio');
-		audio_fire.setAttribute('src', '../sounds/'+TYPES[TANK.type].fire_sound+SOUND_EXP);
+		audio_fire.setAttribute('src', '../sounds/'+TYPES[TANK.type].fire_sound+SOUND_EXT);
 		audio_fire.play();
 		}
 	catch(error){}
@@ -893,7 +888,7 @@ function do_damage(TANK, TANK_TO, BULLET){
 	if(TANK_TO.id == MY_TANK.id && MUTE_FX==false){
 		try{
 			var audio_fire = document.createElement('audio');
-			audio_fire.setAttribute('src', '../sounds/metal'+SOUND_EXP);
+			audio_fire.setAttribute('src', '../sounds/metal'+SOUND_EXT);
 			audio_fire.play();
 			}
 		catch(error){}
@@ -1430,5 +1425,11 @@ function add_tank(level, id, name, type, team, x, y, angle, AI, master_tank, beg
 		TANK_tmp.master = master_tank;	
 	if(begin_time != undefined)
 		TANK_tmp.begin_time = begin_time;
+	TANK_tmp.cx = function(){ 
+		return this.x + TYPES[this.type].size[1]/2;
+		}
+	TANK_tmp.cy = function(){
+		return this.y + TYPES[this.type].size[1]/2;
+		}
 	TANKS.push(TANK_tmp);
 	}
