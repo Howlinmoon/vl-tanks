@@ -7,7 +7,7 @@ function draw_main(){
 	if(frame_last_time==undefined)
 		frame_last_time = Date.now();
 	frame_time = Date.now();
-	var time_gap = Date.now() - frame_last_time;
+	time_gap = Date.now() - frame_last_time;
 	
 	//clear
 	canvas_main.clearRect(0, 0, WIDTH_SCROLL, HEIGHT_SCROLL);
@@ -31,15 +31,7 @@ function draw_main(){
 		try{
 			//speed multiplier
 			var speed_multiplier = 1;
-			speed_first = speed_multiplier;
-			for(var dd in TANKS[i].buffs){
-				if(TANKS[i].buffs[dd].name == 'slow'){
-					var diff = speed_first * TANKS[i].buffs[dd].power / 100;
-					speed_multiplier = speed_multiplier - diff;
-					if(speed_multiplier < 0) 
-						speed_multiplier = 0;
-					}
-				}
+			speed_multiplier = apply_buff(TANKS[i], 'speed', speed_multiplier);
 				
 			//check buffs
 			for(var x=0; x < TANKS[i].buffs.length; x++){
@@ -61,12 +53,12 @@ function draw_main(){
 					if(TANKS[i].team == 'B'){	//top
 						TANKS[i].x = round(APP_SIZE_CACHE[0]*2/3);
 						TANKS[i].y = 20;
-						TANKS[i].hp = TYPES[TANKS[i].type].life[0]+TYPES[TANKS[i].type].life[1]*(TANKS[i].level-1);
+						TANKS[i].hp = get_tank_max_hp(TANKS[i]);
 						}
 					else{	//bottom
 						TANKS[i].x = round(APP_SIZE_CACHE[0]/3);
 						TANKS[i].y = HEIGHT_MAP-20-TYPES[TANKS[i].type].size[1];
-						TANKS[i].hp = TYPES[TANKS[i].type].life[0]+TYPES[TANKS[i].type].life[1]*(TANKS[i].level-1);
+						TANKS[i].hp = get_tank_max_hp(TANKS[i]);
 						}
 					if(TANKS[i].id==MY_TANK.id)
 						auto_scoll_map();
@@ -80,14 +72,15 @@ function draw_main(){
 					delete TANKS[i].respan_time;
 					delete TANKS[i].dead;
 					last_selected_counter = -1;
-					TANKS[i].x -= TYPES[TANKS[i].type].size[1]/4;
-					TANKS[i].y -= TYPES[TANKS[i].type].size[1]/4;
 					}
 				}
 			
 			//check stun
 			if(TANKS[i].stun - Date.now() < 0)
 				delete TANKS[i].stun;
+			
+			//animations
+			do_animations(TANKS[i]);
 				
 			//move lock
 			if(TANKS[i].target_move_lock != undefined){
@@ -96,9 +89,20 @@ function draw_main(){
 					if(TANKS[t].id == TANKS[i].target_move_lock)
 						i_locked = t;
 					}
-				if(TANKS[i_locked] == undefined){	//maybe target is already dead
-					TANKS[i].move = 0;
-					delete TANKS[i].target_move;
+				if(TANKS[i_locked] == undefined || TANKS[i_locked].dead == 1){	//maybe target is already dead
+					if(game_mode == 1){
+						TANKS[i].move = 0;
+						delete TANKS[i].target_move;
+						delete TANKS[i].target_move_lock;
+						}
+					else{
+						var params = [
+							{key: 'move', value: 0 },
+							{key: 'target_move', value: "delete" },
+							{key: 'target_move_lock', value: "delete" },
+							];
+						send_packet('tank_update', [TANKS[i].id, params]);
+						}
 					}
 				else{
 					tmp_distance = get_distance_between_tanks(TANKS[i_locked], TANKS[i]);
@@ -112,9 +116,14 @@ function draw_main(){
 						delete TANKS[i].reach_tank_and_execute;
 						}
 					//reached targeted enemy for general attack
-					if(TANKS[i].reach_tank_and_execute == undefined && tmp_distance < TYPES[TANKS[i].type].range){ 	
-						TANKS[i].move = 0;
-						delete TANKS[i].target_move;
+					if(TANKS[i].reach_tank_and_execute == undefined && TANKS[i].target_move_lock != undefined){
+						if(tmp_distance < TYPES[TANKS[i].type].range-5){ 	
+							TANKS[i].move = 0;
+							}
+						else{
+							TANKS[i].move_to = [TANKS[i_locked].cx(), TANKS[i_locked].cy()];
+							TANKS[i].move = 1;
+							}
 						}
 					}
 				}
@@ -143,6 +152,9 @@ function draw_main(){
 			if(TANKS[i].use_AI == true)
 				check_path_AI(TANKS[i]);
 			
+			if(TANKS[i].invisibility == 1)
+				check_invisibility(TANKS[i]);
+			
 			//move tank
 			if(TANKS[i].move == 1 && TANKS[i].stun == undefined && TANKS[i].move_to != undefined){
 				if(TANKS[i].move_to[0].length == undefined){
@@ -158,8 +170,6 @@ function draw_main(){
 				var angle = (radiance*180.0)/Math.PI+90;
 				angle = round(angle);
 				if(body_rotation(TANKS[i], "angle", TANKS[i].turn_speed, angle, time_gap)){
-					if(TANKS[i].hit_reuse - Date.now() < 0)
-						body_rotation(TANKS[i], "fire_angle", TANKS[i].turn_speed, angle, time_gap);
 					if(distance < speed2pixels(TANKS[i].speed*speed_multiplier, time_gap)){
 						if(TANKS[i].move_to[0].length == undefined){
 							TANKS[i].move = 0;
@@ -195,8 +205,25 @@ function draw_main(){
 							}
 						}	
 					}
-				else if(TANKS[i].hit_reuse - Date.now() < 0)
+				}
+			//fire angle
+			if(TANKS[i].stun == undefined){
+				if(TANKS[i].attacking == undefined){
+					//if peace
+					if(angle != undefined)
 						body_rotation(TANKS[i], "fire_angle", TANKS[i].turn_speed, angle, time_gap);
+					}
+				else{
+					//in battle
+					var TANK_TO = TANKS[i].attacking;
+					dist_x = TANK_TO.cx() - (TANKS[i].cx());
+					dist_y = TANK_TO.cy() - (TANKS[i].cy());
+					var radiance = Math.atan2(dist_y, dist_x);
+					var enemy_angle = (radiance*180.0)/Math.PI+90;
+					
+					//rotate
+					body_rotation(TANKS[i], "fire_angle", TANKS[i].turn_speed, enemy_angle, time_gap);
+					}	//log(TANKS[i].id+"      "+TANKS[i].fire_angle);
 				}
 			//map scrolling
 			if(TANKS[i].id==MY_TANK.id && TANKS[i].move == 1 && MAP_SCROLL_CONTROLL==false && MAP_SCROLL_MODE==1){
@@ -250,6 +277,58 @@ function draw_main(){
 	//request next draw
 	if(render_mode == 'requestAnimationFrame')
 		requestAnimationFrame(draw_main);
+	}
+function do_animations(TANK){
+	if(QUALITY == 1) return false;
+	for(var a=0; a < TANK.animations.length; a++){
+		//lifetime
+		if(TANK.animations[a].lifetime < Date.now() ){
+			TANK.animations.splice(a, 1); a--;
+			continue;
+			}
+		var animation = TANK.animations[a];
+		//jump
+		if(animation.name == 'jump'){
+			var gap = 10;
+			dist_x = animation.to_x - (animation.from_x);
+			dist_y = animation.to_y - (animation.from_y);
+			distance = Math.sqrt((dist_x*dist_x)+(dist_y*dist_y));
+			var radiance = Math.atan2(dist_y, dist_x);
+			if(distance<gap) return false;	
+			for(var i = 0; gap*i < distance; i++){
+				alpha = (animation.lifetime - Date.now()) / animation.duration;
+				alpha = round(alpha*100)/100;
+				x = animation.from_x + round(Math.cos(radiance)*(i*gap));
+				y = animation.from_y + round(Math.sin(radiance)*(i*gap));
+				draw_tank_clone(TANK, x, y, animation.angle, alpha);
+				}
+			}
+		//fire
+		else if(animation.name == 'fire'){
+			alpha = (animation.lifetime - Date.now()) / animation.duration;
+			alpha = round(alpha*100)/100;
+			dist_x = animation.to_x - animation.from_x;
+			dist_y = animation.to_y - animation.from_y;
+			radiance = Math.atan2(dist_y, dist_x);
+			explode_x = animation.from_x + Math.cos(radiance)*(TANK.size()/2+10);
+			explode_y = animation.from_y + Math.sin(radiance)*(TANK.size()/2+10);
+			canvas_main.save();
+			canvas_main.globalAlpha = alpha;
+			canvas_main.translate(explode_x+map_offset[0], explode_y+map_offset[1]);
+			canvas_main.rotate(animation.angle * TO_RADIANS);
+			draw_image(canvas_main, "fire", -(24/2), -(32/2));
+			canvas_main.restore();
+			}
+		//explosion
+		else if(animation.name == 'explosion'){
+			alpha = (animation.lifetime - Date.now()) / animation.duration;
+			alpha = round(alpha*100)/100;
+			canvas_main.save();
+			canvas_main.globalAlpha = alpha;
+			draw_image(canvas_main, 'explosion', animation.x, animation.y);
+			canvas_main.restore();
+			}	
+		}
 	}
 function add_first_screen_elements(){
 	add_settings_buttons(canvas_backround, ["Single player","Multiplayer","Settings"]);
@@ -1031,24 +1110,24 @@ function update_scrolling_chat(CHAT){
 //calculate body and turret rotation
 function body_rotation(obj, str, speed, rot, time_diff){
 	if(obj.stun != undefined)	return false; //stun
-	if(obj.speed == 0)	return false; //0 speed
-	speed = speed * 100 * time_diff/1000;
-	var flag = false;
-	if (obj[str] - 180 > rot){
-		rot += 360;
-	}
-	if (obj[str] + 180 < rot){
-		rot -= 360;
-	}
-	if (obj[str] - rot > speed){
+	if(obj.speed == 0 && TYPES[obj.type].type == 'tank')	return false; //0 speed
+	speed = speed * 100 * time_diff/1000;	
+			//if(str=="fire_angle" && obj.name==name) log(round(speed)+"            "+obj[str]);
+	
+	if (obj[str] > 360) obj[str] = obj[str] - 360;
+	if (obj[str] < 0) obj[str] = obj[str] + 360;
+	
+	if (obj[str] - 180 > rot) rot += 360;
+	if (obj[str] + 180 < rot) rot -= 360;
+	if (obj[str] - rot > speed)
 		obj[str] -= speed;
-	} else if (obj[str] - rot < -speed){
+	else if(obj[str] - rot < -speed)
 		obj[str] += speed;
-	} else {
+	else{
 		obj[str] = rot;
-		flag = true;
-	}
-	return flag;
+		return true
+		}
+	return false;
 	}
 function draw_image(canvas, name, x, y, max_w, max_h, offset_x, offset_y, clip_w, clip_h){
 	if(offset_x == undefined) offset_x = 0;
