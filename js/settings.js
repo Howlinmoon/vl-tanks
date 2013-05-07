@@ -1,5 +1,5 @@
 //game settings
-var VERSION = "1.4";			//app version
+var VERSION = "1.4.1";			//app version
 var SOCKET = ['tryunion.com', '80'];	//socket server //unionplatform.com - amazing service
 var FPS = 25;				//frames per second
 var settings_font = "bold 18px Helvetica";	//default font for settings buttons
@@ -63,7 +63,7 @@ var pre_draw_functions = [];		//extra functions executed before main draw loop
 var on_click_functions = [];		//on click custom actions functions, only if mouse_click_controll=true
 var game_mode = 0;			//1=single player, 2=multi player
 var QUALITY = 3;			//1=low, 2=mid, 3=high
-var PLACE = '';				//init, intro, settings, select, game, score, rooms, room, create_room
+var PLACE = '';				//init, intro, settings, library, select, game, score, rooms, room, create_room
 var preloaded=false;			//if all images preloaded
 var preload_total=0;			//total images for preload
 var preload_left=0;			//total images left for preload
