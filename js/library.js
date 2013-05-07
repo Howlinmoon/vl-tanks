@@ -219,5 +219,7 @@ function draw_library_maps(){
 	var y = TOP;
 	var gap = 5;
 	
+	maps_positions = [];
+	game_mode = 1;
 	show_maps_selection(canvas_backround, y, true);
 	}
