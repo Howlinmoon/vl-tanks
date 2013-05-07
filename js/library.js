@@ -144,74 +144,39 @@ function draw_library_units(selected_tank){
 		canvas_backround.fillStyle = "#69a126";
 		canvas_backround.fillText(text, info_left+preview_xy+40+text_width+10, y+25);
 		
-		function lib_show_stats(name, value, x, y, nobold, min_char_value, max_char_value){
-			value_copy = value;
-			//check
-			if(value == undefined)		value = "-";
-			if(typeof value == 'object')	value = value[0]+" + "+value[1];
-			if(value == 1)			value = "Yes";
-			//name
-			canvas_backround.font = "normal 10px Verdana";
-			canvas_backround.fillStyle = "#444444";
-			canvas_backround.fillText(name, x, y);
-			//value
-			if(nobold !== true)
-				canvas_backround.font = "bold 11px Verdana";
-			else
-				canvas_backround.font = "normal 11px Verdana";
-			canvas_backround.fillStyle = "#196119";
-			canvas_backround.fillText(value, x+90, y);
-			//chart
-			if(max_char_value != undefined){
-				value = value_copy;
-				if(typeof value == 'object')	value = value[0];
-				value = value - min_char_value;
-				max_char_value = max_char_value - min_char_value;
-				x = x + 90 + 90;
-				height = 5;
-				var max_width = WIDTH_APP-x-20;
-				width = round((value * max_width) / max_char_value);
-				if(width >= max_width){
-					width = max_width;
-					canvas_backround.fillStyle = "#c50000";					
-					}
-				else
-					canvas_backround.fillStyle = "#69a126";
-				canvas_backround.fillRect(x, y-height, width, height);
-				}
-			}
 		var height_space = 16;
 		var st=0;
+		var xx = info_left+preview_xy+40;
 		var value = [round(TYPES[selected_tank].damage[0]/TYPES[selected_tank].attack_delay), TYPES[selected_tank].damage[1]/TYPES[selected_tank].attack_delay]
-		lib_show_stats("DPS", value, info_left+preview_xy+40, y+50+st*height_space, false, 10, 30); st++;
-		lib_show_stats("Life", TYPES[selected_tank].life, info_left+preview_xy+40, y+50+st*height_space, false, 100, 250); st++;
-		lib_show_stats("Armor", TYPES[selected_tank].armor, info_left+preview_xy+40, y+50+st*height_space, false, 0, 40); st++;
-		lib_show_stats("Speed", TYPES[selected_tank].speed, info_left+preview_xy+40, y+50+st*height_space, false, 0, 35); st++;
-		lib_show_stats("Range", TYPES[selected_tank].range, info_left+preview_xy+40, y+50+st*height_space); st++;
-		lib_show_stats("Scout", TYPES[selected_tank].scout, info_left+preview_xy+40, y+50+st*height_space); st++;
-		lib_show_stats("Turn speed", TYPES[selected_tank].turn_speed, info_left+preview_xy+40, y+50+st*height_space); st++;
-		lib_show_stats("Ignore armor", TYPES[selected_tank].ignore_armor, info_left+preview_xy+40, y+50+st*height_space); st++;
+		lib_show_stats("DPS", value, xx, y+50+st*height_space, 90, false, 10, 30); st++;
+		lib_show_stats("Life", TYPES[selected_tank].life, xx, y+50+st*height_space, 90, false, 100, 250); st++;
+		lib_show_stats("Armor", TYPES[selected_tank].armor, xx, y+50+st*height_space, 90, false, 0, 40); st++;
+		lib_show_stats("Speed", TYPES[selected_tank].speed, xx, y+50+st*height_space, 90, false, 20, 35); st++;
+		lib_show_stats("Range", TYPES[selected_tank].range, xx, y+50+st*height_space, 90); st++;
+		lib_show_stats("Scout", TYPES[selected_tank].scout, xx, y+50+st*height_space, 90); st++;
+		lib_show_stats("Turn speed", TYPES[selected_tank].turn_speed, xx, y+50+st*height_space, 90); st++;
+		lib_show_stats("Ignore armor", TYPES[selected_tank].ignore_armor, info_left+preview_xy+40, y+50+st*height_space, 90); st++;
 		//1st ability
 		var value = "";
 		if(TYPES[selected_tank].abilities[0] != undefined){
 			function_name = TYPES[selected_tank].abilities[0].name.replace(/ /g,'_');
 			value = TYPES[selected_tank].abilities[0].name + " - "+window[function_name]({abilities_lvl: [1,1,1], type: selected_tank}, true);
 			}
-		lib_show_stats("1st ability", value, info_left+preview_xy+40, y+50+st*height_space, true); st++;
+		lib_show_stats("1st ability", value, xx, y+50+st*height_space, 90, true); st++;
 		//2nd ability
 		var value = "";
 		if(TYPES[selected_tank].abilities[1] != undefined){
 			function_name = TYPES[selected_tank].abilities[1].name.replace(/ /g,'_');
 			value = TYPES[selected_tank].abilities[1].name + " - "+window[function_name]({abilities_lvl: [1,1,1], type: selected_tank}, true);
 			}
-		lib_show_stats("2nd ability", value, info_left+preview_xy+40, y+50+st*height_space, true); st++;
+		lib_show_stats("2nd ability", value, xx, y+50+st*height_space, 90, true); st++;
 		//3rd ability
 		var value = "";
 		if(TYPES[selected_tank].abilities[2] != undefined){
 			function_name = TYPES[selected_tank].abilities[2].name.replace(/ /g,'_');
 			value = TYPES[selected_tank].abilities[2].name + " - "+window[function_name]({abilities_lvl: [1,1,1], type: selected_tank}, true);
 			}
-		lib_show_stats("3rd ability", value, info_left+preview_xy+40, y+50+st*height_space, true); st++;
+		lib_show_stats("3rd ability", value, xx, y+50+st*height_space, 90, true); st++;
 		}
 	}
 function draw_library_maps(){
@@ -222,4 +187,41 @@ function draw_library_maps(){
 	maps_positions = [];
 	game_mode = 1;
 	show_maps_selection(canvas_backround, y, true);
+	}
+function lib_show_stats(name, value, x, y, gap, nobold, min_char_value, max_char_value){
+	value_copy = value;
+	//check
+	if(value == undefined)		value = "-";
+	if(typeof value == 'object')	value = value[0]+" + "+value[1];
+	if(value == 1)			value = "Yes";
+	//name
+	canvas_backround.font = "normal 10px Verdana";
+	canvas_backround.fillStyle = "#444444";
+	canvas_backround.fillText(name, x, y);
+	//value
+	if(nobold !== true)
+		canvas_backround.font = "bold 11px Verdana";
+	else
+		canvas_backround.font = "normal 11px Verdana";
+	canvas_backround.fillStyle = "#196119";
+	canvas_backround.fillText(value, x+gap, y);
+	//chart
+	if(max_char_value != undefined){
+		value = value_copy;
+		if(typeof value == 'object')	value = value[0];
+		value = value - min_char_value;
+		max_char_value = max_char_value - min_char_value;
+		x = x + gap + 90;
+		height = 5;
+		var max_width = WIDTH_APP-x-20;
+		width = round((value * max_width) / max_char_value);
+		if(width<0) width = 0;
+		if(width >= max_width){
+			width = max_width;
+			canvas_backround.fillStyle = "#c50000";					
+			}
+		else
+			canvas_backround.fillStyle = "#69a126";
+		canvas_backround.fillRect(x, y-height, width, height);
+		}
 	}
