@@ -1,7 +1,8 @@
 IDEAS
 	cartoonish design
 		red blue green
-		3d models
+	number of opponents on single
+	fog on/off	
 	truck -> APC/LAV
 	Helium3
 		base, mines generates, spawn takes, on 0 - team dies.
