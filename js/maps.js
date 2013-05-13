@@ -223,6 +223,8 @@ function show_maps_selection(canvas_this, top_height, can_select_map){
 							//we have click on map
 							level = 1+parseInt(maps_positions[i].index); 
 							show_maps_selection(canvas_backround, top_height, true);
+							if(PLACE == 'library')
+								draw_library_maps();
 							}
 					
 						}
