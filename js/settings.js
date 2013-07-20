@@ -1,4 +1,3 @@
-
 //========= game settings ======================================================
 		
 var VERSION = "2.0";			//app version
@@ -26,7 +25,7 @@ var CRYSTAL_POWER = 3000;		//how much he3 1 crystal has
 var CRYSTAL_THREADS = 10;		//max silos for 1 crystal
 var CRYSTAL_RANGE = 100;		//crystal/silo range
 var HE3_BEGIN = 260;			//he-3 at begin, recommended 260
-var SILO_POWER = 100;			//how much he3 silo generates per 1s
+var SILO_POWER = 2;			//how much he3 silo generates per 1s
 var QUALITY = 3;			//1=low, 2=mid, 3=high
 var MAX_BULLET_RANGE = 160;		//for units position sync, if exeeds - unit position is synced
 
