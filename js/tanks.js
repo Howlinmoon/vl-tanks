@@ -472,12 +472,12 @@ function UNITS_CLASS(){
 				break;
 				}
 			//draw
-			//if(tank.team == MY_TANK.team){
+			if(tank.team == MY_TANK.team){
 				canvas_main.fillStyle = "#d9ce00";
 				hp_height = 3;
 				var gap = 3*(t+1);
 				canvas_main.fillRect(xx+padding_left, yy+padding_top-gap-hp_height, length, hp_height);
-			//	}
+				}
 			break;
 			}
 		};
