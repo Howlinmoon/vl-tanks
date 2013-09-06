@@ -930,7 +930,7 @@ function UNITS_CLASS(){
 				if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'tank') continue;	//soldiers can go over tanks, why? see above
 				if(TYPES[TANK.type].type == 'human' && TYPES[TANKS[i].type].type == 'human') continue;	//soldier can go over soldiers ...
 				if(TYPES[TANK.type].name == 'Silo' && TYPES[TANKS[i].type].type != 'building') continue;	//Mechanic can craft over others
-				if(TANK.use_AI != undefined && TANKS[i].data.name == 'Tower') continue; //ai can go through towers
+				if(TANK.use_AI != undefined && TANKS[i].data.name == 'Tower' && MAPS[level-1].name != 'Hell') continue; //ai can go through towers
 				if(TANKS[i].dead == 1) continue;		//tank dead
 				
 				var size2_w = TANKS[i].width();
