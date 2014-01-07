@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-//game settings
-var VERSION = "1.5";			//app version
-=======
 
 //========= game settings ======================================================
 		
 var VERSION = "2.0";			//app version
->>>>>>> 5fd56e52afbcd39e05606aaaa55fb790a6ffc55f
 var DEBUG = false;			//show debug info
 var SOCKET = ['tryunion.com', '80'];	//socket server //unionplatform.com - amazing service
 var APP_URL = 'http://viliusle.github.io/vl-tanks/';	//homepage
